@@ -3,8 +3,7 @@ import { User } from "../graphql/typeDefs/user";
 import { createApiClient } from '../utils/apiClientFactory';
 import { handleAxiosError } from '../utils/apiErrorUtils';
 
-//const IAM_BASE_URL = " https://le269y0k40.execute-api.us-east-1.amazonaws.com/dev/api/users";
-const IAM_BASE_URL = " http://localhost:8083/api/users";
+const IAM_BASE_URL = process.env.ORG_SERVICE_BASE_URL || 'http://localhost:8083/api/users';
 
 export const userAPI ={
     ...createApiClient<User>(IAM_BASE_URL),

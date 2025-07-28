@@ -3,8 +3,7 @@ import { Company } from '../graphql/typeDefs/company';
 import { createApiClient } from '../utils/apiClientFactory';
 import { handleAxiosError } from '../utils/apiErrorUtils';
 
-//const BASE_URL = 'https://u4xrg11u25.execute-api.us-east-1.amazonaws.com/dev/api/companies';
-const BASE_URL = 'http://localhost:8082/api/companies';
+const BASE_URL = process.env.COMPANY_SERVICE_BASE_URL || 'http://localhost:8082/api/companies';
 
 export const companyAPI = {
   ...createApiClient<Company>(BASE_URL),

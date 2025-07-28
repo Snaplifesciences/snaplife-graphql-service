@@ -3,8 +3,7 @@ import { Organization } from '../graphql/typeDefs/organization';
 import axios from 'axios';
 import { handleAxiosError } from '../utils/apiErrorUtils';
 
-//const BASE_URL = 'https://b1fmewq9hl.execute-api.us-east-1.amazonaws.com/dev/api/organizations';
-const BASE_URL = 'http://localhost:8081/api/organizations';
+const BASE_URL = process.env.ORG_SERVICE_BASE_URL || 'http://localhost:8081/api/organizations';
 
 export const organizationAPI = {
   ...createApiClient<Organization>(BASE_URL),
