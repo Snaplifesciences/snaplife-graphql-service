@@ -4,7 +4,7 @@ import { handleAxiosError } from '../utils/apiErrorUtils';
 const BASE_URL = process.env.AUTH_SERVICE_BASE_URL || 'http://localhost:3001/api/auth';
 
 
-export const authServiceClient = {
+export const authAPI = {
 
   async signInWithPassword (email: string, password: string) {
     try {

@@ -1,14 +1,14 @@
-// authenticationService.ts
-import { wrapServiceError } from '../utils/apiErrorUtils';
-import { authServiceClient } from "../clients/authServiceClient";
-import { AuthResult } from '../types/authentication';
+// authService.ts
+import { wrapServiceError } from '../../utils/apiErrorUtils';
+import { authAPI } from "../../datasources/authAPI";
+import { AuthResult } from '../typeDefs/auth';
 
-class AuthenticationService {
+class AuthService {
 
   async signInWithPassword(email: string, password: string): Promise<AuthResult>{
     console.log('signInWithPassword called with email:', email);
     try{
-        return await authServiceClient.signInWithPassword(email, password);
+        return await authAPI.signInWithPassword(email, password);
     } catch (error) {
         throw wrapServiceError(error, 'Authentication service failed while signing in');
     }
@@ -26,11 +26,11 @@ class AuthenticationService {
     // Implement logic to refresh the user token
     // Example: Validate refresh token, generate new token, etc.
     try {
-      return await authServiceClient.refreshToken(refreshToken);
+      return await authAPI.refreshToken(refreshToken);
     } catch (error) {
       throw wrapServiceError(error, 'Authentication service failed while refreshing token');
     }
   }
 }
 
-export default new AuthenticationService();
+export default new AuthService();

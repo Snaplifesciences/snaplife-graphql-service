@@ -1,9 +1,7 @@
-import { companyResolver } from './company';
-import { organizationResolver } from './organization';
-import { authenticationResolver } from './authentication';
-import { userResolver } from './user';
-
-
+import { companyResolver } from './companyResolver';
+import { organizationResolver } from './organizationResolver';
+import { authResolver } from './authResolver';
+import { userResolver } from './userResolver';
 import { GraphQLJSONObject } from 'graphql-type-json';
 
 
@@ -18,7 +16,7 @@ export const resolvers = {
     ...companyResolver.Mutation,
     ...organizationResolver.Mutation,
     ...userResolver.Mutation,
-    ...authenticationResolver.Mutation
+    ...authResolver.Mutation
   },
   Company: {
     ...companyResolver.Company

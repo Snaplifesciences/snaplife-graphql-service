@@ -1,13 +1,13 @@
-import { organizationServiceClient } from '../clients/organizationServiceClient';
-import { Organization } from '../types/organization';
-import { wrapServiceError } from '../utils/apiErrorUtils';
+import { organizationAPI } from '../../datasources/organizationAPI';
+import { Organization } from '../typeDefs/organization';
+import { wrapServiceError } from '../../utils/apiErrorUtils';
 
 class OrganizationService {
  
   async createOrganization(input: any): Promise<Organization> {
     console.log('Creating organization with input:', input);
     try {
-      return await organizationServiceClient.create(input);
+      return await organizationAPI.create(input);
     } catch (error) {
       throw wrapServiceError(error, 'Organization service failed while creating organization');
     }
@@ -16,7 +16,7 @@ class OrganizationService {
   async getById(id: string): Promise<Organization | null> {
       console.log(`Fetching organization by id: ${id}`);
       try {
-        return await organizationServiceClient.getById(id);
+        return await organizationAPI.getById(id);
       } catch (error) {
         throw wrapServiceError(error, `Organization service failed while fetching organization by id ${id}`);
       }
@@ -25,7 +25,7 @@ class OrganizationService {
   async findByName(name: string): Promise<Organization | null> {
       console.log(`Fetching organization by name: ${name}`);
       try {
-        return await organizationServiceClient.findByName(name);
+        return await organizationAPI.findByName(name);
       } catch (error) {
         throw wrapServiceError(error, `Organization service failed while fetching organization by name ${name}`);
       }
@@ -34,7 +34,7 @@ class OrganizationService {
   async getAll(): Promise<Organization[]> {
       console.log('Fetching all organizations');
       try {
-        return await organizationServiceClient.getAll();
+        return await organizationAPI.getAll();
       } catch (error) {
         throw wrapServiceError(error, 'Organization service failed while fetching all organizations');
       }
@@ -43,7 +43,7 @@ class OrganizationService {
   async updateOrganization (id: string, input: any): Promise<Organization> {
       console.log(`Updating organization with id: ${id}`, input);
       try {
-        return await organizationServiceClient.update(id, input);
+        return await organizationAPI.update(id, input);
       } catch (error) {
         throw wrapServiceError(error, `Organization service failed while updating organization id ${id}`);
       }
@@ -52,7 +52,7 @@ class OrganizationService {
   async deleteOrganization(id: string): Promise<boolean>{
       console.log(`Deleting organization with id: ${id}`);
       try {
-        return await organizationServiceClient.delete(id);
+        return await organizationAPI.delete(id);
       } catch (error) {
         throw wrapServiceError(error, `Organization service failed while deleting organization id ${id}`);
       }

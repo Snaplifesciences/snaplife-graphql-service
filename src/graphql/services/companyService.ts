@@ -1,13 +1,13 @@
-import { companyServiceClient } from '../clients/companyClient';
-import { Company } from '../types/company';
-import { wrapServiceError } from '../utils/apiErrorUtils';
+import { companyAPI } from '../../datasources/companyAPI';
+import { Company } from '../typeDefs/company';
+import { wrapServiceError } from '../../utils/apiErrorUtils';
 
 class CompanyService {
 
   async createCompany(input: any): Promise<Company> {
       console.log('Creating company with input:', input);
       try {
-        return await companyServiceClient.create(input);
+        return await companyAPI.create(input);
       } catch (error) {
         throw wrapServiceError(error, 'Company service failed while creating company');
       }
@@ -16,7 +16,7 @@ class CompanyService {
   async getById(id: string): Promise<Company | null>{
       console.log(`Fetching company by id: ${id}`);
       try {
-        return await companyServiceClient.getById(id);
+        return await companyAPI.getById(id);
       } catch (error) {
         throw wrapServiceError(error, `Company service failed while fetching company id ${id}`);
       }
@@ -25,7 +25,7 @@ class CompanyService {
   async  findByName(name: string): Promise<Company | null>{
       console.log(`Fetching company by name: ${name}`);
       try {
-        return await companyServiceClient.findByName(name);
+        return await companyAPI.findByName(name);
       } catch (error) {
         throw wrapServiceError(error, `Company service failed while fetching company ${name}`);
       }
@@ -34,7 +34,7 @@ class CompanyService {
   async getAllByOrganizationId(organizationId: string): Promise<Company[] | null> {
       console.log(`Fetching company by organization id: ${organizationId}`);
       try {
-        return await companyServiceClient.getByOrganizationId(organizationId);
+        return await companyAPI.getByOrganizationId(organizationId);
       } catch (error) {
         throw wrapServiceError(error, `Company service failed while fetching company by organization id ${organizationId}`);
       }
@@ -43,7 +43,7 @@ class CompanyService {
   async getAllCompanies(): Promise<Company[]> {
       console.log('Fetching all companies');
       try {
-        return await companyServiceClient.getAll();
+        return await companyAPI.getAll();
       } catch (error) {
         throw wrapServiceError(error, 'Company service failed while fetching all companies');
       }
@@ -52,7 +52,7 @@ class CompanyService {
   async updateCompany (id: string, input: any): Promise<Company>{
       console.log(`Updating company with id: ${id}`, input);
       try {
-        return await companyServiceClient.update(id, input);
+        return await companyAPI.update(id, input);
       } catch (error) {
         throw wrapServiceError(error, 'Company service failed while updating company');
       }
@@ -61,7 +61,7 @@ class CompanyService {
   async deleteCompany (id: string): Promise<boolean>{
       console.log(`Deleting company with id: ${id}`);
       try {
-        return await companyServiceClient.delete(id);
+        return await companyAPI.delete(id);
       } catch (error) {
         throw wrapServiceError(error, `Company service failed while deleting company id ${id}`);
       }

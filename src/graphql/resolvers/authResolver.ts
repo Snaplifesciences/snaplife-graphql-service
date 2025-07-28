@@ -1,11 +1,11 @@
-import authenticationService from '../services/authenticationService'; 
+import authenticationService from '../services/authService'; 
 import userService from '../services/userService';
 import companyService from '../services/companyService';
 import organizationService from '../services/organizationService';
-import { mustExist } from '../utils/apiErrorUtils';
+import { mustExist } from '../../utils/apiErrorUtils';
 import { AuthenticationError } from 'apollo-server-errors';
 
-export const authenticationResolver = {
+export const authResolver = {
 
   Query: {
     refreshToken: async (_: any, args: { token: string }) => {
