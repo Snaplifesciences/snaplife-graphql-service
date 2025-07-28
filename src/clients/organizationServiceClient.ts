@@ -1,0 +1,24 @@
+import { createApiClient } from '../utils/apiClientFactory';
+import { Organization } from '../types/organization';
+import axios from 'axios';
+import { handleAxiosError } from '../utils/apiErrorUtils';
+
+//const BASE_URL = 'https://b1fmewq9hl.execute-api.us-east-1.amazonaws.com/dev/api/organizations';
+const BASE_URL = 'http://localhost:8081/api/organizations';
+
+export const organizationServiceClient = {
+  ...createApiClient<Organization>(BASE_URL),
+
+  // Custom method: search by name
+  async findByName(name: string): Promise<Organization | null> {
+    try {
+      const res = await axios.get(`${BASE_URL}/search?name=${encodeURIComponent(name)}`);
+      if (Array.isArray(res.data)) {
+        return res.data.length > 0 ? res.data[0] : null;
+      }
+      return res.data || null;
+    } catch (error) {
+      throw handleAxiosError(error, `Failed to fetch organization by name ${name}`);
+    }
+  },
+};

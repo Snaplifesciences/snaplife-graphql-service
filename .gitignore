@@ -1,0 +1,8 @@
+# .gitignore
+node_modules
+index.test.js
+.env
+*.zip
+dist/*.zip
+.aws-sam
+.DS_Store

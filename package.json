@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.12.2",
+    "apollo-server": "^3.13.0",
+    "apollo-server-errors": "^3.3.1",
+    "axios": "^1.10.0",
+    "graphql": "^16.11.0",
+    "graphql-type-json": "^0.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
