@@ -22,7 +22,7 @@ Globals:
   Function:
     Timeout: 30
     MemorySize: 1024
-    Runtime: nodejs18.x
+    Runtime: nodejs22.x
 
 Resources:
   GraphQLFunction:
@@ -31,7 +31,6 @@ Resources:
       FunctionName: !Sub snaplife-graphql-service-${Stage}
       CodeUri: dist/
       Handler: lambda.handler
-      ReservedConcurrencyLimit: 10
       Environment:
         Variables:
           NODE_ENV: !Ref Stage
