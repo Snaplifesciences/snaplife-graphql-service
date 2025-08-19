@@ -11,8 +11,13 @@ export function mustExist<T>(value: T | null | undefined, error: Error): T {
 
 
 export function handleResolverError(error: unknown, message = 'An unknown error occurred') {
-  if (error instanceof Error) throw new Error(error.message);
-  throw new Error(message);
+  if (error instanceof Error) {
+    // Preserve original error with additional context
+    const enhancedError = new Error(`${message}: ${error.message}`);
+    enhancedError.stack = error.stack;
+    throw enhancedError;
+  }
+  throw new Error(`${message}: ${String(error)}`);
 }
 
 /**
@@ -21,17 +26,17 @@ export function handleResolverError(error: unknown, message = 'An unknown error 
 export function handleAxiosError(error: unknown, defaultMsg: string): ApiError {
   if (axios.isAxiosError(error)) {
     const httpStatus = error.response?.status;
-    const backendErr: Partial<BackendError> = typeof error.response?.data === 'object'
-      ? error.response?.data ?? {}
+    const responseData = error.response?.data;
+    const backendErr: Partial<BackendError> = (typeof responseData === 'object' && responseData !== null)
+      ? responseData
       : {};
 
     return new ApiError({
       status: backendErr.status || 'ERROR',
       message: backendErr.message || defaultMsg,
-      debugMessage: backendErr.debugMessage,
-      timestamp: backendErr.timestamp,
+      debugMessage: backendErr.debugMessage || error.message,
+      timestamp: backendErr.timestamp || new Date().toISOString(),
       httpStatus,
-      ...backendErr,
     });
   }
   return new ApiError({
@@ -60,5 +65,11 @@ export function wrapServiceError(error: unknown, fallbackMsg: string): ServiceEr
       ...extensions,
     });
   }
-  return error as ServiceError;
+  
+  // Create a new ServiceError for non-ApiError cases
+  return new ServiceError({
+    message: fallbackMsg,
+    status: 'ERROR',
+    debugMessage: error instanceof Error ? error.message : String(error)
+  });
 }

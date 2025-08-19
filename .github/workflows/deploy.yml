@@ -1,0 +1,60 @@
+name: Deploy GraphQL Service
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build
+      run: npm run build:lambda
+    
+    - name: Validate SAM template
+      run: sam validate --template-file template.yml
+    
+    - name: Setup AWS SAM
+      uses: aws-actions/setup-sam@v2
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Set deployment environment
+      id: env
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          echo "stage=dev" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "stage=prod" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Deploy to AWS
+      if: steps.env.outputs.stage
+      run: |
+        sam deploy \
+          --template-file template.yml \
+          --stack-name snaplife-graphql-service-${{ steps.env.outputs.stage }} \
+          --s3-bucket snaplife-graphql-service-deployments \
+          --s3-prefix ${{ steps.env.outputs.stage }} \
+          --parameter-overrides Stage=${{ steps.env.outputs.stage }} \
+          --capabilities CAPABILITY_IAM \
+          --no-confirm-changeset

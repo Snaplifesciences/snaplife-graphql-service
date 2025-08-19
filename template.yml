@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+  AuthServiceUrl:
+    Type: String
+    Default: https://nk30ayxcy0.execute-api.us-east-1.amazonaws.com
+  OrgServiceUrl:
+    Type: String
+    Default: https://b1fmewq9hl.execute-api.us-east-1.amazonaws.com
+  CompanyServiceUrl:
+    Type: String
+    Default: https://u4xrg11u25.execute-api.us-east-1.amazonaws.com
+  UserServiceUrl:
+    Type: String
+    Default: https://s9j8lqeych.execute-api.us-east-1.amazonaws.com
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 1024
+    Runtime: nodejs18.x
+
+Resources:
+  GraphQLFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub snaplife-graphql-service-${Stage}
+      CodeUri: dist/
+      Handler: lambda.handler
+      ReservedConcurrencyLimit: 10
+      Environment:
+        Variables:
+          NODE_ENV: !Ref Stage
+          AUTH_SERVICE_BASE_URL: !Sub ${AuthServiceUrl}/${Stage}/api/auth
+          ORG_SERVICE_BASE_URL: !Sub ${OrgServiceUrl}/${Stage}/api/organizations
+          COMPANY_SERVICE_BASE_URL: !Sub ${CompanyServiceUrl}/${Stage}/api/companies
+          USER_SERVICE_BASE_URL: !Sub ${UserServiceUrl}/${Stage}/api/users
+      Events:
+        GraphQLApi:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId: !Ref GraphQLApi
+        GraphQLApiProxy:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref GraphQLApi
+
+  GraphQLApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      MethodSettings:
+        - ResourcePath: /*
+          HttpMethod: '*'
+          ThrottlingRateLimit: 100
+          ThrottlingBurstLimit: 200
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+Outputs:
+  GraphQLApiUrl:
+    Description: URL of the GraphQL API
+    Value: !Sub https://${GraphQLApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/
+    Export:
+      Name: !Sub ${AWS::StackName}-GraphQLApiUrl

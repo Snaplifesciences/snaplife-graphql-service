@@ -1,28 +1,32 @@
 import organizationService  from '../services/organizationService';
+import { withAuth } from '../../utils/authUtils';
+import { withRBACAsync } from '../../middleware/withRBAC';
+import { logger } from '../../utils/logger';
 
 export const organizationResolver = {
   Query: {
-    getOrganizationById: async (_parent: any, { id }: { id: string }) => {
+    getOrganizationById: withRBACAsync(['PLATFORM_ADMIN','ORG_ADMIN'], ['manageOrganization', 'manageCompanies'])(async (_parent: any, { id }: { id: string }) => {
       return await organizationService.getById(id);
-    },
-    getAllOrganizations: async () => {
+    }),
+    getOrganizations: withRBACAsync(['PLATFORM_ADMIN'], ['manageCompanies','manageOrganization'])(async (_, args, context) => {
       return await organizationService.getAll();
-    },
-    findOrganizationByName: async (_parent: any, { name }: { name: string }) => {
-      console.log(`Fetching organization by name: ${name}`);
+    }),
+    findOrganizationByName: withRBACAsync(['PLATFORM_ADMIN','ORG_ADMIN'], ['manageOrganization', 'manageCompanies'])(async (_parent: any, { name }: { name: string }) => {
+      const sanitizedName = name.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '');
+      logger.info('OrganizationResolver::findOrganizationByName initiated', { name: sanitizedName });
       return await organizationService.findByName(name);
-    }
+    })
   },
   Mutation: {
-    createOrganization: async (_parent: any, { input }: { input: any }) => {
+    createOrganization: withRBACAsync(['PLATFORM_ADMIN'], ['manageCompanies','manageOrganization'])(async (_parent: any, { input }: { input: any }) => {
       return await organizationService.createOrganization(input);
-    },
-    updateOrganization: async (_parent: any, { id, input }: { id: string, input: any }) => {
+    }),
+    updateOrganization: withRBACAsync(['PLATFORM_ADMIN'], ['manageCompanies','manageOrganization'])(async (_parent: any, { id, input }: { id: string, input: any }) => {
       return await organizationService.updateOrganization(id, input);
-    },
-    deleteOrganization: async (_parent: any, { id }: { id: string }) => {
+    }),
+    deleteOrganization: withRBACAsync(['PLATFORM_ADMIN'], ['manageCompanies','manageOrganization'])(async (_parent: any, { id }: { id: string }) => {
       return await organizationService.deleteOrganization(id);
-    }
+    })
   },
   Organization: {
     addresses: (org: any) => org.addresses

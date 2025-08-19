@@ -11,6 +11,7 @@ export const resolvers = {
     ...organizationResolver.Query,
     ...companyResolver.Query,
     ...userResolver.Query,
+    ...authResolver.Query,
   },
   Mutation: {
     ...companyResolver.Mutation,

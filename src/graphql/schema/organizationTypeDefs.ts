@@ -1,7 +1,7 @@
 export const organizationTypeDefs = `#graphql
   type Query {
     getOrganizationById(id: ID!): Organization
-    getAllOrganizations: [Organization!]!
+    getOrganizations: [Organization!]!
     findOrganizationByName(name: String!): Organization
   }
 
@@ -13,17 +13,19 @@ export const organizationTypeDefs = `#graphql
 
   input CreateOrganizationInput {
     name: String!
+    country: String!
     status: String!
-    addresses: [CreateOrganizationAddressInput!]
+    addresses: [OrganizationAddressInput!]
   }
 
   input UpdateOrganizationInput {
     name: String
+    country: String
     status: String
-    addresses: [CreateOrganizationAddressInput!]
+    addresses: [OrganizationAddressInput!]
   }
 
-  input CreateOrganizationAddressInput {
+  input OrganizationAddressInput {
     addressLine1: String!
     addressLine2: String
     addressLine3: String
@@ -37,6 +39,7 @@ export const organizationTypeDefs = `#graphql
     id: ID!
     status: String!
     name: String!
+    country: String!
     addresses: [OrganizationAddress!]!
   }
 
@@ -56,5 +59,7 @@ export const organizationTypeDefs = `#graphql
   type OrganizationSummary {
     id: ID!
     name: String!
+    status: String!
+    country: String!
   }
 `;

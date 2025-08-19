@@ -3,35 +3,48 @@ export interface BackendError {
   message: string;
   debugMessage?: string;
   timestamp?: string;
-  [key: string]: any; // For future extensibility
 }
 
-export class ApiError extends Error {
+interface BaseErrorParams {
+  message: string;
   status?: string;
   httpStatus?: number;
   debugMessage?: string;
   timestamp?: string;
-  extensions?: Record<string, any>;
+  [key: string]: unknown;
+}
 
-  constructor(params: BackendError & { httpStatus?: number }) {
+class BaseError extends Error {
+  status?: string;
+  httpStatus?: number;
+  debugMessage?: string;
+  timestamp?: string;
+  extensions?: Record<string, unknown>;
+
+  constructor(name: string, params: BaseErrorParams) {
     super(params.message);
-    this.name = "ApiError";
+    this.name = name;
     this.status = params.status;
     this.httpStatus = params.httpStatus;
     this.debugMessage = params.debugMessage;
     this.timestamp = params.timestamp;
-    this.extensions = { ...params };
+    const { message, status, httpStatus, debugMessage, timestamp, ...otherParams } = params;
+    this.extensions = { ...otherParams };
   }
 }
 
-// types/errors.ts
-export class ServiceError extends Error {
-  status?: string;
+interface ApiErrorParams extends BaseErrorParams {
   httpStatus?: number;
+}
+
+export class ApiError extends BaseError {
+  constructor(params: ApiErrorParams) {
+    super("ApiError", params);
+  }
+}
+
+export class ServiceError extends BaseError {
   code?: string;
-  debugMessage?: string;
-  timestamp?: string;
-  extensions?: Record<string, any>;
 
   constructor(params: {
     message: string;
@@ -40,15 +53,9 @@ export class ServiceError extends Error {
     code?: string;
     debugMessage?: string;
     timestamp?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }) {
-    super(params.message);
-    this.name = "ServiceError";
-    this.status = params.status;
-    this.httpStatus = params.httpStatus;
+    super("ServiceError", params);
     this.code = params.code;
-    this.debugMessage = params.debugMessage;
-    this.timestamp = params.timestamp;
-    this.extensions = { ...params };
   }
 }

@@ -17,13 +17,13 @@ export const userTypeDefs = `#graphql
     type User {
         id: ID!
         email: String!
-        firstName: String
-        lastName: String
-        status: String
+        firstName: String!
+        lastName: String!
+        status: String!
         attributes: JSONObject
         roles: [UserRole!]!
-        organizationId: ID
-        companyId: ID
+        organizationId: ID!
+        companyId: ID!
     }
 
     type UserRole {
@@ -32,14 +32,12 @@ export const userTypeDefs = `#graphql
     }
 
     input UserInput {
-        id: ID!
         email: String!
-        firstName: String
-        lastName: String
+        firstName: String!
+        lastName: String!
         status: String
         attributes: JSONObject
-        roles: [String]
-        organizationId: ID
-        companyId: ID
+        organizationId: ID!
+        companyId: ID!
     }
 `;

@@ -2,60 +2,55 @@ import axios from "axios";
 import { User } from "../graphql/typeDefs/user";
 import { createApiClient } from '../utils/apiClientFactory';
 import { handleAxiosError } from '../utils/apiErrorUtils';
+import { logger } from '../utils/logger';
 
-const IAM_BASE_URL = process.env.ORG_SERVICE_BASE_URL || 'http://localhost:8083/api/users';
+interface ActivationRequest {
+  password?: string;
+  [key: string]: any;
+}
 
-export const userAPI ={
-    ...createApiClient<User>(IAM_BASE_URL),
+const IAM_BASE_URL = process.env.USER_SERVICE_BASE_URL;
+if (!IAM_BASE_URL) {
+  throw new Error('USER_SERVICE_BASE_URL environment variable is required');
+}
+
+const apiClient = createApiClient<User>(IAM_BASE_URL);
+
+export const userAPI = {
+    ...apiClient,
 
     async getAuthenticatedUserById(id: string): Promise<User | null> {
-      console.log(`Fetching authenticated user with ID: ${id}`);
-        try {
-            const response = await axios.get(
-              `${IAM_BASE_URL}/authenticated/${id}`
-              );
-            const data = response.data;
-            console.log(`Authenticated user data:`, data);
-            return {
-                id: data.id,
-                email: data.email,
-                firstName: data.firstName,
-                lastName: data.lastName,
-                status: data.status,
-                attributes: data.attributes || {},
-                roles: data.roles || [],
-                organizationId: data.organizationId,
-                companyId: data.companyId,
-            };
-        } catch (error: any) {
-            throw handleAxiosError(error, `Authentication failed`);
-        }
+        logger.info('UserAPI::getAuthenticatedUserById initiated', { userId: id });
+        const data = await apiClient.get(`/authenticated/${id}`);
+        logger.info('UserAPI::getAuthenticatedUserById completed successfully');
+        return {
+            id: data.id,
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            status: data.status,
+            attributes: data.attributes || {},
+            roles: data.roles || [],
+            organizationId: data.organizationId,
+            companyId: data.companyId,
+        };
     },
 
-    async activateUser(activationToken: string, requestBody: any): Promise<void> {
-        try {
-          await axios.post(`${IAM_BASE_URL}/activate/${activationToken}`, requestBody); 
-        } catch (error: any) {
-          throw handleAxiosError(error, `Failed to activate user for token ${activationToken}`);
-        }
+    async activateUser(activationToken: string, requestBody: ActivationRequest): Promise<void> {
+        logger.info('UserAPI::activateUser initiated');
+        await apiClient.get(`/activate/${activationToken}`);
+        logger.info('UserAPI::activateUser completed successfully');
     },
 
     async resendActivationToken(activationToken: string): Promise<void> {
-        try {
-          await axios.post(`${IAM_BASE_URL}/resend/${activationToken}`);
-        } catch (error: any) {
-          throw handleAxiosError(error, `Failed to resend activation token for ${activationToken}`);
-        }
+        logger.info('UserAPI::resendActivationToken initiated');
+        await apiClient.get(`/resend/${activationToken}`);
+        logger.info('UserAPI::resendActivationToken completed successfully');
     },
     
     async validateToken(activationToken: string): Promise<void> {
-        try {
-          await axios.get(`${IAM_BASE_URL}?activationToken=${activationToken}`);
-        } catch (error: any) {
-          throw handleAxiosError(error, `Failed to validate activation token ${activationToken}`);
-        }
-    },
-    
+        logger.info('UserAPI::validateToken initiated');
+        await apiClient.get(`?activationToken=${encodeURIComponent(activationToken)}`);
+        logger.info('UserAPI::validateToken completed successfully');
+    }
 };
-
-

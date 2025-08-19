@@ -1,18 +1,26 @@
-import { Company } from "./company";
-import { Organization } from "./organization";
-import { User } from "./user";
 
-export interface AuthResult {
-    token: string;
-    refreshToken: string;
-    expiresIn: number;
-    userId: string;
-}
+export interface SignInResponse  {
+  success: boolean;
+  message: string;
+  tokenId: string; 
+  user: {
+    id: string;
+    email: string;
+    companyId?: string | null;
+    organizationId?: string | null;
+    userId?: string | null;
+  };
+};
 
-export interface SignInResponse {
-    token: string;
-    user: User;
-    organization: Organization;
-    company: Company;
-}
+export interface SessionResponse {
+  user: {
+    id: string;
+    email: string;
+    companyId?: string | null;
+    userId?: string | null;
+    [k: string]: unknown;
+  };
+  accessToken: string;
+  expired: boolean;
+};
 

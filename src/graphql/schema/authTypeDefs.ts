@@ -1,6 +1,11 @@
 export const authTypeDefs = `#graphql
   scalar JSONObject
 
+  type Query {
+    me: User
+    testAuth: String
+  }
+
   type Mutation {
     signIn(input: SignInInput!): SignInPayload
   }
@@ -11,20 +16,20 @@ export const authTypeDefs = `#graphql
   }
 
   type SignInPayload {
-    token: String
-    user: User
+    token: String!
+    user: User!
     company: CompanySummary
     organization: OrganizationSummary
   }
 
   type User {
-    id: ID
-    email: String
-    firstName: String
-    lastName: String
-    status: String
+    id: ID!
+    email: String!
+    firstName: String!
+    lastName: String!
+    status: String!
     attributes: JSONObject
-    roles: [UserRole!]
+    roles: [UserRole!]!
     organization: OrganizationSummary
     company: CompanySummary
   }

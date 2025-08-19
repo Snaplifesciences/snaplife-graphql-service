@@ -1,79 +1,113 @@
 // src/services/userService.ts
 import { User } from "../typeDefs/user";
+import { ActivationInput } from "../typeDefs/user";
 import { userAPI } from "../../datasources/userAPI";
 import { wrapServiceError } from '../../utils/apiErrorUtils';
+import { logger } from '../../utils/logger';
+
+
 
 class UserService {
 
-  async fetchUsers(): Promise<User[]> {
-    console.log('Fetching all users');
+  async createUser(user: User): Promise<User> {
+    const sanitizedUser = {
+      email: user.email?.replace(/[\r\n]/g, '') || 'unknown',
+      firstName: user.firstName || 'unknown',
+      lastName: user.lastName || 'unknown'
+    };
+    logger.info('UserService::createUser initiated', { user: sanitizedUser });
     try {
-      return userAPI.getAll();
+      const result = await userAPI.create(user);
+      logger.info('UserService::createUser completed successfully', { userId: result.id });
+      return result;
     } catch (error) {
+      logger.error('UserService::createUser failed', error);
+      throw wrapServiceError(error, 'User service failed while creating user');
+    }
+  }
+
+  async fetchUsers(): Promise<User[]> {
+    logger.info('UserService::fetchUsers initiated');
+    try {
+      const result = await userAPI.getAll();
+      logger.info('UserService::fetchUsers completed successfully', { count: result.length });
+      return result;
+    } catch (error) {
+      logger.error('UserService::fetchUsers failed', error);
       throw wrapServiceError(error, 'User service failed while getting all the users');
     }
   }
 
   async getAuthenticatedUserById(id: string): Promise<User | null> {
-    console.log('Getting authenticated user by id:', id);
+    logger.info('UserService::getAuthenticatedUserById initiated', { userId: id });
     try {
-      return await userAPI.getAuthenticatedUserById(id);
+      const result = await userAPI.getAuthenticatedUserById(id);
+      logger.info('UserService::getAuthenticatedUserById completed successfully', { userId: id });
+      return result;
     } catch (error) {
+      logger.error('UserService::getAuthenticatedUserById failed', error);
       throw wrapServiceError(error, 'User service failed while getting authenticated user by id');
     }
   }
 
-  async createUser(user: User): Promise<User> {
-    console.log('Creating user:', user);
-    try {
-      return await userAPI.create(user);
-    } catch (error) {
-      throw wrapServiceError(error, 'User service failed while creating user');
-    }
-  }
-
   async modifyUser(id: string, updatedUser: Partial<User>): Promise<User | null> {
-    console.log(`Updating user with id: ${id}`, updatedUser);
+    logger.info('UserService::modifyUser initiated', { userId: id });
     try {
-      return await userAPI.update(id, updatedUser);
+      const result = await userAPI.update(id, updatedUser);
+      logger.info('UserService::modifyUser completed successfully', { userId: id });
+      return result;
     } catch (error) {
-      throw wrapServiceError(error, `User service failed while updating user id: ${id}`);
+      logger.error('UserService::modifyUser failed', error);
+      throw wrapServiceError(error, 'User service failed while updating user');
     }
   }
 
   async removeUser(id: string): Promise<boolean> {
-    console.log(`Deleting user with id: ${id}`);
+    logger.info('UserService::removeUser initiated', { userId: id });
     try {
-      return await userAPI.delete(id);
+      await userAPI.delete(id);
+      logger.info('UserService::removeUser completed successfully', { userId: id });
+      return true;
     } catch (error) {
-      throw wrapServiceError(error, `User service failed while deleting user id: ${id}`);
+      logger.error('UserService::removeUser failed', error);
+      throw wrapServiceError(error, 'User service failed while deleting user');
     }
   }
 
-  async activateUser(activationToken: string, input: any): Promise<boolean> {
-    console.log(`Activating user with token: ${activationToken}`, input);
+  async activateUser(activationToken: string, input: ActivationInput): Promise<boolean> {
+    logger.info('UserService::activateUser initiated');
     try {
       await userAPI.activateUser(activationToken, input);
+      logger.info('UserService::activateUser completed successfully');
+      return true;
     } catch (error) {
-      throw wrapServiceError(error, `User service failed while activating user, token: ${activationToken}`);
+      logger.error('UserService::activateUser failed', error);
+      throw wrapServiceError(error, 'User service failed while activating user');
     }
-    return true;
   }
 
   async resendActivationToken(activationToken: string): Promise<boolean> {
-    console.log(`Resending activation token: ${activationToken}`);
+    logger.info('UserService::resendActivationToken initiated');
     try {
       await userAPI.resendActivationToken(activationToken);
+      logger.info('UserService::resendActivationToken completed successfully');
     } catch (error) {
-      throw wrapServiceError(error, `User service failed while resending activation token, token: ${activationToken}`);
+      logger.error('UserService::resendActivationToken failed', error);
+      throw wrapServiceError(error, 'User service failed while resending activation token');
     }
     return true;
   }
 
   async validateToken(activationToken: string): Promise<boolean> {
-    console.log(`Validating activation token: ${activationToken}`);
-    await userAPI.validateToken(activationToken);
-    return true;
+    logger.info('UserService::validateToken initiated');
+    try {
+      await userAPI.validateToken(activationToken);
+      logger.info('UserService::validateToken completed successfully');
+      return true;
+    } catch (error) {
+      logger.error('UserService::validateToken failed', error);
+      throw wrapServiceError(error, 'User service failed while validating token');
+    }
   }
 
 }

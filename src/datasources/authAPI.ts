@@ -1,42 +1,78 @@
 import axios from 'axios';
 import { handleAxiosError } from '../utils/apiErrorUtils';
+import { SignInResponse, SessionResponse } from '../graphql/typeDefs/auth';
+import { logger } from '../utils/logger';
 
-const BASE_URL = process.env.AUTH_SERVICE_BASE_URL || 'http://localhost:3001/api/auth';
+if (!process.env.AUTH_SERVICE_BASE_URL) {
+  throw new Error('AUTH_SERVICE_BASE_URL environment variable is required');
+}
+const BASE_URL = process.env.AUTH_SERVICE_BASE_URL;
 
 
-export const authAPI = {
+class  AuthAPI  {
 
-  async signInWithPassword (email: string, password: string) {
+  /**
+   * 
+   * Signs in a user with email and password.
+   * @param email 
+   * @param password 
+   * @returns 
+   */
+  async signInWithPassword(email: string, password: string): Promise<SignInResponse> {
     try {
-      const res = await axios.post(`${BASE_URL}/signin`, {
-        email,
-        password,
-      });
-      console.log('Sign-in response:', res.data);
-      // Validate response structure
-      if (!res.data || !res.data.token) {
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+      logger.info('Signing in user');
+      const res = await axios.post(`${BASE_URL}/signin`, {email,password});
+      logger.info('Sign-in successful');
+      const responseData = res.data;
+      const signinData = responseData.data;
+      
+      if (!signinData?.tokenId || !signinData?.user?.id) {
         throw new Error('Invalid response from authentication service');
       }
-      return res.data;
+      
+      return {
+        message: responseData.message,
+        success: responseData.success || false,
+        tokenId: signinData.tokenId,
+        user: signinData.user
+      };
     } catch (error) {
-      console.error('Error during sign-in:', error);
-      throw handleAxiosError(error, `Failed to sign in user with email ${email}`);
+      logger.error('Error during sign-in', error);
+      throw handleAxiosError(error, 'Failed to sign in user');
     }
-  },
-
-  async refreshToken (refreshToken: string) {
+  }
+  
+  /**
+   * Validates the token and returns session details.
+   * @param tokenId 
+   * @returns 
+   */
+  async getSessionByTokenId(tokenId: string): Promise<SessionResponse> {
+    logger.info('Getting session by tokenId');
     try {
-      const res = await axios.post(`${BASE_URL}/refresh`, {
-        refreshToken,
-      });
-      console.log('Refresh token response:', res.data);
-      // Validate response structure
-      if (!res.data || !res.data.token) {
-        throw new Error('Invalid response from authentication service');
+      const res = await axios.get(`${BASE_URL}/verify?tokenId=${encodeURIComponent(tokenId)}`);
+      logger.info('Session verification successful');
+      
+      const responseData = res.data;
+      const sessionData = responseData.data;
+      
+      if (!sessionData?.user?.id) {
+        throw new Error('Invalid session response from authentication service');
       }
-      return res.data;
+      
+      return {
+        user: sessionData.user,
+        expired: sessionData.expired || false,
+        accessToken: sessionData.accessToken || tokenId
+      };
     } catch (error) {
-      throw handleAxiosError(error, 'Failed to refresh user token');
+      logger.error('Error verifying session', error);
+      throw handleAxiosError(error, 'Failed to verify session');
     }
-  },
-};
+  }
+}
+
+export default new AuthAPI();

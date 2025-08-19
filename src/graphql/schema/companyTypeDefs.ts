@@ -38,8 +38,8 @@ export const companyTypeDefs = `#graphql
     partnerStatus: String
     taxId: String
     attributes: JSONObject
-    contacts: [CreateCompanyContactInput!]
-    addresses: [CreateCompanyAddressInput!]
+    contacts: [UpdateCompanyContactInput!]
+    addresses: [UpdateCompanyAddressInput!]
   }
 
   input CreateCompanyContactInput {
@@ -58,6 +58,25 @@ export const companyTypeDefs = `#graphql
     state: String!
     postalCode: String!
     country: String!
+    addressType: String
+  }
+
+  input UpdateCompanyContactInput {
+    firstName: String
+    lastName: String
+    email: String
+    phone: String
+    jobTitle: String
+  }
+
+  input UpdateCompanyAddressInput {
+    addressLine1: String
+    addressLine2: String
+    addressLine3: String
+    city: String
+    state: String
+    postalCode: String
+    country: String
     addressType: String
   }
 
@@ -107,5 +126,6 @@ export const companyTypeDefs = `#graphql
   type CompanySummary {
     id: ID!
     name: String!
+    status: String!
   }
 `;

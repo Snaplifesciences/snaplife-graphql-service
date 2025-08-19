@@ -35,7 +35,7 @@ export interface CompanyContact {
     territory: string;
     partnerStatus: string;
     taxId?: string | null;
-    attributes: any;
+    attributes: Record<string, unknown>;
     contacts: CompanyContact[];
     addresses: CompanyAddress[];
   }

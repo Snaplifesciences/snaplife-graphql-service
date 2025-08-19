@@ -1,36 +1,51 @@
 // authService.ts
 import { wrapServiceError } from '../../utils/apiErrorUtils';
-import { authAPI } from "../../datasources/authAPI";
-import { AuthResult } from '../typeDefs/auth';
+import { SignInResponse, SessionResponse } from '../typeDefs/auth';
+import authAPI from '../../datasources/authAPI';
+
+import { logger } from '../../utils/logger';
 
 class AuthService {
 
-  async signInWithPassword(email: string, password: string): Promise<AuthResult>{
-    console.log('signInWithPassword called with email:', email);
+  async signInWithPassword(email: string, password: string): Promise<SignInResponse>{
+    const sanitizedEmail = email.replace(/[\r\n]/g, '');
+    logger.info('AuthService::signInWithPassword initiated', { email: sanitizedEmail });
     try{
-        return await authAPI.signInWithPassword(email, password);
+        const result = await authAPI.signInWithPassword(email, password);
+        logger.info('AuthService::signInWithPassword completed successfully');
+        return result;
     } catch (error) {
-        throw wrapServiceError(error, 'Authentication service failed while signing in');
+        logger.error('AuthService::signInWithPassword failed', error);
+        throw wrapServiceError(error, 'AuthService::Authentication service failed while signing in');
     }
   }
 
   async invalidateSession(token: string): Promise<boolean> {
-    console.log('invalidateSession called with token:', token);
-    // Implement logic to invalidate the session
-    // Example: Remove token from storage or mark it as invalid
-    return true;
-  }
-
-  async refreshUserToken(refreshToken: string): Promise<AuthResult> {
-    console.log('refreshUserToken called with refreshToken:', refreshToken);
-    // Implement logic to refresh the user token
-    // Example: Validate refresh token, generate new token, etc.
+    logger.info('AuthService::invalidateSession initiated', { tokenLength: token.length });
     try {
-      return await authAPI.refreshToken(refreshToken);
+      // Implement logic to invalidate the session
+      // Example: Remove token from storage or mark it as invalid
+      logger.info('AuthService::invalidateSession completed successfully');
+      return true;
     } catch (error) {
-      throw wrapServiceError(error, 'Authentication service failed while refreshing token');
+      logger.error('AuthService::invalidateSession failed', error);
+      throw error;
     }
   }
+
+  async getSessionByTokenId(tokenId: string): Promise<SessionResponse> {
+    logger.info('AuthService::getSessionByTokenId initiated', { tokenLength: tokenId.length });
+    try {
+      const result = await authAPI.getSessionByTokenId(tokenId);
+      logger.info('AuthService::getSessionByTokenId completed successfully');
+      return result;
+    } catch (error) {
+      logger.error('AuthService::getSessionByTokenId failed', error);
+      throw wrapServiceError(error, 'AuthService::Authentication service failed while verifying session');
+    }
+  }
+
+
 }
 
 export default new AuthService();

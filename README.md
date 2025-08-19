@@ -116,3 +116,46 @@ To start the GraphQL service in development mode:
 npm run dev
 # or
 yarn dev
+```
+
+## Deployment
+
+### AWS Lambda Deployment
+
+This service can be deployed as an AWS Lambda function with API Gateway.
+
+#### Option 1: Manual Deployment
+
+1. **Build and package:**
+   ```bash
+   ./deploy.sh
+   ```
+
+2. **Deploy to AWS Lambda:**
+   - Upload `lambda-deployment.zip` to AWS Lambda
+   - Set handler to `lambda.handler`
+   - Set runtime to Node.js 18.x
+   - Configure API Gateway to proxy all requests
+
+#### Option 2: Serverless Framework
+
+1. **Install Serverless:**
+   ```bash
+   npm install -g serverless
+   ```
+
+2. **Deploy:**
+   ```bash
+   npm run build:lambda
+   serverless deploy
+   ```
+
+#### Option 3: AWS SAM
+
+1. **Install AWS SAM CLI**
+
+2. **Deploy:**
+   ```bash
+   npm run build:lambda
+   sam deploy --guided
+   ```

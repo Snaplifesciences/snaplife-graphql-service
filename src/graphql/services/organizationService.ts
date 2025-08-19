@@ -1,38 +1,54 @@
 import { organizationAPI } from '../../datasources/organizationAPI';
 import { Organization } from '../typeDefs/organization';
 import { wrapServiceError } from '../../utils/apiErrorUtils';
+import { logger } from '../../utils/logger';
+import { CreateOrganizationInput, UpdateOrganizationInput } from '../../types/inputs';
 
 class OrganizationService {
  
-  async createOrganization(input: any): Promise<Organization> {
-    console.log('Creating organization with input:', input);
+  async createOrganization(input: CreateOrganizationInput): Promise<Organization> {
+    const sanitizedName = input.name?.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') || 'unknown';
+    logger.info('OrganizationService::createOrganization initiated', { name: sanitizedName });
     try {
-      return await organizationAPI.create(input);
+      const result = await organizationAPI.create(input);
+      logger.info('OrganizationService::createOrganization completed successfully');
+      return result;
     } catch (error) {
+      logger.error('OrganizationService::createOrganization failed', error);
       throw wrapServiceError(error, 'Organization service failed while creating organization');
     }
   }
 
   async getById(id: string): Promise<Organization | null> {
-      console.log(`Fetching organization by id: ${id}`);
+      logger.info('OrganizationService::getById initiated', { organizationId: id });
       try {
-        return await organizationAPI.getById(id);
+        const result = await organizationAPI.getById(id);
+        logger.info('OrganizationService::getById completed successfully');
+        return result;
       } catch (error) {
-        throw wrapServiceError(error, `Organization service failed while fetching organization by id ${id}`);
+        logger.error('OrganizationService::getById failed', error);
+        throw wrapServiceError(error, 'Organization service failed while fetching organization by id');
       }
   }
 
   async findByName(name: string): Promise<Organization | null> {
-      console.log(`Fetching organization by name: ${name}`);
+      if (!name || typeof name !== 'string') {
+        logger.error('OrganizationService::findByName failed - invalid name parameter');
+        throw new Error('Name parameter is required and must be a string');
+      }
+      const sanitizedName = name.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '');
+      logger.info('OrganizationService::findByName initiated', { name: sanitizedName });
       try {
-        return await organizationAPI.findByName(name);
+        const result = await organizationAPI.findByName(sanitizedName);
+        logger.info('OrganizationService::findByName completed successfully');
+        return result;
       } catch (error) {
-        throw wrapServiceError(error, `Organization service failed while fetching organization by name ${name}`);
+        logger.error('OrganizationService::findByName failed', error);
+        throw wrapServiceError(error, 'Organization service failed while fetching organization by name');
       }
   }
 
   async getAll(): Promise<Organization[]> {
-      console.log('Fetching all organizations');
       try {
         return await organizationAPI.getAll();
       } catch (error) {
@@ -40,21 +56,29 @@ class OrganizationService {
       }
   }
 
-  async updateOrganization (id: string, input: any): Promise<Organization> {
-      console.log(`Updating organization with id: ${id}`, input);
+  async updateOrganization (id: string, input: UpdateOrganizationInput): Promise<Organization> {
+      const sanitizedId = id.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '');
+      logger.info('OrganizationService::updateOrganization initiated', { organizationId: sanitizedId });
       try {
-        return await organizationAPI.update(id, input);
+        const result = await organizationAPI.update(sanitizedId, input);
+        logger.info('OrganizationService::updateOrganization completed successfully');
+        return result;
       } catch (error) {
-        throw wrapServiceError(error, `Organization service failed while updating organization id ${id}`);
+        logger.error('OrganizationService::updateOrganization failed', error);
+        throw wrapServiceError(error, 'Organization service failed while updating organization');
       }
   }
 
   async deleteOrganization(id: string): Promise<boolean>{
-      console.log(`Deleting organization with id: ${id}`);
+      const sanitizedId = id.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '');
+      logger.info('OrganizationService::deleteOrganization initiated', { organizationId: sanitizedId });
       try {
-        return await organizationAPI.delete(id);
+        const result = await organizationAPI.delete(sanitizedId);
+        logger.info('OrganizationService::deleteOrganization completed successfully');
+        return result;
       } catch (error) {
-        throw wrapServiceError(error, `Organization service failed while deleting organization id ${id}`);
+        logger.error('OrganizationService::deleteOrganization failed', error);
+        throw wrapServiceError(error, 'Organization service failed while deleting organization');
       }
   }
 
