@@ -2,13 +2,12 @@ name: Deploy GraphQL Service
 
 on:
   push:
-    branches:
-      - develop
-      - main
-
+    branches: [develop,main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_DEFAULT_REGION: us-east-1
     
     steps:
     - uses: actions/checkout@v4
@@ -25,11 +24,11 @@ jobs:
     - name: Build
       run: npm run build:lambda
     
-    - name: Validate SAM template
-      run: sam validate --template-file template.yml
-    
     - name: Setup AWS SAM
       uses: aws-actions/setup-sam@v2
+
+    - name: Validate SAM template
+      run: sam validate --template-file template.yml
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -41,14 +40,25 @@ jobs:
     - name: Set deployment environment
       id: env
       run: |
-        if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-          echo "stage=dev" >> $GITHUB_OUTPUT
-        elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-          echo "stage=prod" >> $GITHUB_OUTPUT
-        fi
-    
+          branch="${GITHUB_REF##*/}"   # or: branch="${GITHUB_REF_NAME:-${GITHUB_REF##*/}}"
+          if [[ "$branch" == "main" ]]; then
+            stage=dev
+          elif [[ "$branch" == "develop" ]]; then
+            stage=dev
+          else
+            stage=""
+          fi
+          
+          echo "stage=$stage" >> "$GITHUB_OUTPUT"
+          echo "Branch=$branch, Stage=$stage"
+    - name: Show selected stage
+      run: echo "Branch=${GITHUB_REF##*/}, Stage=${{ steps.env.outputs.stage }}"
+    - name: Sanity check AWS config
+      run: |
+          aws configure list
+          aws sts get-caller-identity
     - name: Deploy to AWS
-      if: steps.env.outputs.stage
+      if: steps.env.outputs.stage != ''
       run: |
         sam deploy \
           --template-file template.yml \
@@ -58,3 +68,4 @@ jobs:
           --parameter-overrides Stage=${{ steps.env.outputs.stage }} \
           --capabilities CAPABILITY_IAM \
           --no-confirm-changeset
+          --region $AWS_DEFAULT_REGION
