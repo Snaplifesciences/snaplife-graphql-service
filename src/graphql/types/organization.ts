@@ -16,14 +16,22 @@ export interface OrganizationAddress {
   city: string;
   state: string;
   postalCode: string;
-  country: string;
+  country?: string;
 }
 
-export interface CreateOrganizationAddressInput extends Omit<OrganizationAddress, 'id' | 'organizationId'> {}
+export interface CreateOrganizationAddressInput {
+  addressLine1: string;
+  addressLine2?: string;
+  addressLine3?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country?: string;
+}
 
 export interface CreateOrganizationInput {
   name: string;
-  country: string;
+  country?: string;
   status: string;
   addresses?: CreateOrganizationAddressInput[];
 }

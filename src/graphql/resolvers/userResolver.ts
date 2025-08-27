@@ -247,14 +247,27 @@ export const userResolver = {
       return userService.removeUser(id);
     }),
 
-    // Publicly accessible mutations — no RBAC applied
-    setupProfile: (_: any, { activationToken, input }: { activationToken: string; input: any }) =>
-      userService.setupProfile(activationToken, input),
+    // Restricted: Only authenticated users with appropriate roles/permissions can activate
+    activateAccount: withRBACAsync(
+      [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN, ROLES.USER],
+      [PERMISSIONS.MANAGE_USERS]
+    )((_: any, { activationToken, input }: { activationToken: string; input: any }) =>
+      userService.setupProfile(activationToken, input)
+    ),
 
-    resendActivationToken: (_: any, { activationToken }: { activationToken: string }) =>
-      userService.resendActivationToken(activationToken),
+    resendActivationToken: withRBACAsync(
+      [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN, ROLES.USER],
+      [PERMISSIONS.MANAGE_USERS]
+    )((_: any, { activationToken }: { activationToken: string }) =>
+      userService.resendActivationToken(activationToken)
+    ),
 
-    validateActivationToken: (_: any, { activationToken }: { activationToken: string }) =>
+    validateActivationToken: withRBACAsync(
+      [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN, ROLES.USER],
+      [PERMISSIONS.MANAGE_USERS]
+    )((_: any, { activationToken }: { activationToken: string }) =>
       userService.validateToken(activationToken)
+    )
   }
+
 };

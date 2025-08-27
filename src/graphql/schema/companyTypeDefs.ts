@@ -1,10 +1,10 @@
 export const companyTypeDefs = `#graphql
-  type Query {
+  extend type Query {
     companies: [Company!]!
     getCompanyById(id: ID!): Company
   }
 
-  type Mutation {
+  extend type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
     updateCompany(id: ID!, input: UpdateCompanyInput!): Company!
     deleteCompany(id: ID!): Boolean!

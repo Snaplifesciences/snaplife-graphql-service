@@ -1,7 +1,7 @@
 import { userAPI } from '../../datasources/userAPI';
 import { wrapServiceError } from '../../error/apiErrorUtils';
 import { logger } from '../../utils/logger';
-import { CreateUserInput, UpdateUserInput, User, ActivationInput } from '../types/user';
+import { CreateUserInput, UpdateUserInput, User, ActivateAccountInput } from '../types/user';
 
 class UserService {
 
@@ -78,7 +78,7 @@ class UserService {
     }
   }
 
-  async setupProfile(activationToken: string, input: ActivationInput): Promise<boolean> {
+  async setupProfile(activationToken: string, input: ActivateAccountInput): Promise<boolean> {
     const sanitizedToken = activationToken.substring(0, 8) + '...';
     logger.info('UserService::setupProfile initiated', { activationToken: sanitizedToken });
     try {

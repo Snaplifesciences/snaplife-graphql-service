@@ -1,6 +1,4 @@
 import authService from '../graphql/services/authService';
-import { logger } from '../utils/logger';
-import { Request } from 'express';
 
 export interface AuthContext {
   user?: {

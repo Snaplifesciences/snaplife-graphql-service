@@ -40,7 +40,7 @@ export function createApiClient<T>(baseUrl: string) {
         url: client.defaults.baseURL,
         id 
       });
-      if (!id || typeof id !== 'string' || id.trim() === '') {
+      if (!id || id.trim() === '') {
         throw new Error('Invalid ID: ID must be a non-empty string');
       }
       const sanitizedId = sanitizeId(id);
@@ -62,7 +62,7 @@ export function createApiClient<T>(baseUrl: string) {
     },
     async getAll(): Promise<T[]> {
       logger.info('ApiClientFactory::getAll - Fetching all resources', { url: client.defaults.baseURL });
-      if (!baseUrl || typeof baseUrl !== 'string' || baseUrl.trim() === '') {
+      if (!baseUrl || baseUrl.trim() === '') {
         throw new Error('Invalid base URL: base URL must be a non-empty string');
       }
       try {
@@ -86,7 +86,7 @@ export function createApiClient<T>(baseUrl: string) {
         id,
         input
       });
-      if (!id || typeof id !== 'string' || id.trim() === '') {
+      if (!id || id.trim() === '') {
         throw new Error('Invalid ID: ID must be a non-empty string');
       }
       const sanitizedId = sanitizeId(id);
@@ -111,7 +111,7 @@ export function createApiClient<T>(baseUrl: string) {
         url: client.defaults.baseURL,
         id 
       });
-      if (!id || typeof id !== 'string' || id.trim() === '') {
+      if (!id || id.trim() === '') {
         throw new Error('Invalid ID: ID must be a non-empty string');
       }
       const sanitizedId = sanitizeId(id);
@@ -133,7 +133,7 @@ export function createApiClient<T>(baseUrl: string) {
     },
     async get(path: string): Promise<any> {
       logger.info('ApiClientFactory::get - Fetching resource by path', { path });
-      if (!path || typeof path !== 'string') {
+      if (!path) {
         throw new Error('Invalid path: path must be a non-empty string');
       }
       // Validate path to prevent SSRF attacks

@@ -1,9 +1,9 @@
 export const organizationTypeDefs = `#graphql
-  type Query {
+  extend type Query {
     organizations: [Organization!]!
   }
 
-  type Mutation {
+  extend type Mutation {
     createOrganization(input: CreateOrganizationInput!): Organization!
     updateOrganization(id: ID!, input: UpdateOrganizationInput!): Organization!
     deleteOrganization(id: ID!): Boolean!
@@ -11,7 +11,7 @@ export const organizationTypeDefs = `#graphql
 
   input CreateOrganizationInput {
     name: String!
-    country: String!
+    country: String
     status: String!
     addresses: [CreateOrganizationAddressInput!]
   }
@@ -30,7 +30,7 @@ export const organizationTypeDefs = `#graphql
     city: String!
     state: String!
     postalCode: String!
-    country: String!
+    country: String
   }
 
   input UpdateOrganizationAddressInput {
@@ -62,7 +62,7 @@ export const organizationTypeDefs = `#graphql
     city: String!
     state: String!
     postalCode: String!
-    country: String!
+    country: String
   }
 
 `;

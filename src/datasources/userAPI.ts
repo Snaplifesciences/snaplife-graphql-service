@@ -1,4 +1,4 @@
-import { ActivationInput, User } from "../graphql/types/user";
+import { ActivateAccountInput, User } from "../graphql/types/user";
 import { createApiClient } from '../utils/apiClientFactory';
 import { logger } from '../utils/logger';
 
@@ -32,9 +32,21 @@ export const userAPI = {
         };
     },
 
-    async activateUser(activationToken: string, input: ActivationInput): Promise<void> {
+    async activateUser(activationToken: string, input: ActivateAccountInput): Promise<void> {
         logger.info('UserAPI::activateUser initiated');
-        await apiClient.get(`/activate/${encodeURIComponent(activationToken)}`);
+        // Switch to POST request with payload as per new requirement
+        const path = `/activate/${encodeURIComponent(activationToken)}`;
+        const body = {
+            password: input?.password,
+            confirmPassword: input?.confirmPassword
+        };
+        const baseUrl = process.env.USER_SERVICE_BASE_URL;
+        if (!baseUrl) {
+            throw new Error('USER_SERVICE_BASE_URL environment variable is required');
+        }
+        const url = `${baseUrl}${API_PATH}${path}`;
+        const axios = require('axios');
+        await axios.post(url, body);
         logger.info('UserAPI::activateUser completed successfully');
     },
 

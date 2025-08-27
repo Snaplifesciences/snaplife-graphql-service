@@ -1,12 +1,10 @@
 export const authTypeDefs = `#graphql
-  scalar JSONObject
-
-  type Query {
+  extend type Query {
     me: User
     testAuth: String
   }
 
-  type Mutation {
+  extend type Mutation {
     signIn(input: SignInInput!): SignInResponse
   }
 

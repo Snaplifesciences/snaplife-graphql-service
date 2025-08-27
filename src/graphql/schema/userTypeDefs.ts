@@ -1,15 +1,15 @@
 export const userTypeDefs = `#graphql
 
-    type Query {
+    extend type Query {
         getUsers: [User!]!
         getAuthenticatedUserById(id: ID!): User
     }
 
-    type Mutation {
+    extend type Mutation {
         createUser(input: CreateUserInput!): User!
         updateUser(id: ID!, input: UpdateUserInput!): User
         deleteUser(id: ID!): Boolean!
-        setupProfile(activationToken: String!, input: SetupProfileInput!): Boolean!
+        activateAccount(activationToken: String!, input: ActivateAccountInput!): Boolean!
         resendActivationToken(activationToken: String!): Boolean!
         validateActivationToken(activationToken: String!): Boolean!
     }
@@ -68,7 +68,7 @@ export const userTypeDefs = `#graphql
         permissions: JSONObject
     }
 
-    input SetupProfileInput {
+    input ActivateAccountInput {
         password: String!
         confirmPassword: String!
     }

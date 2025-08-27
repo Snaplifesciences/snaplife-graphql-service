@@ -31,7 +31,7 @@ export interface UpdateUserInput {
   status?: string;
 }
 
-export interface ActivationInput {
+export interface ActivateAccountInput {
   password?: string;
   confirmPassword?: string;
 }
