@@ -5,7 +5,38 @@ import { CreateUserInput, UpdateUserInput } from '../types/user';
 import { GraphQLError } from 'graphql';
 import { logger } from '../../utils/logger';
 
+import companyService from '../services/companyService';
+import organizationService from '../services/organizationService';
+
 export const userResolver = {
+  User: {
+    company: async (user: any) => {
+      if (!user.companyId) return null;
+      try {
+        return await companyService.getById(user.companyId);
+      } catch (error) {
+        logger.error('UserResolver::company - Failed to fetch company', {
+          userId: user.id,
+          companyId: user.companyId,
+          error
+        });
+        return null;
+      }
+    },
+    organization: async (user: any) => {
+      if (!user.organizationId) return null;
+      try {
+        return await organizationService.getById(user.organizationId);
+      } catch (error) {
+        logger.error('UserResolver::organization - Failed to fetch organization', {
+          userId: user.id,
+          organizationId: user.organizationId,
+          error
+        });
+        return null;
+      }
+    }
+  },
   Query: {
     getUsers: withRBACAsync(
       [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN],

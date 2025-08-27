@@ -37,6 +37,7 @@ export interface AuthApiSessionResponse {
 
 class  AuthAPI  {
   private BASE_URL: string;
+  private API_PATH: string = '/api/auth';
 
   constructor() {
     if (!process.env.AUTH_SERVICE_BASE_URL) {
@@ -46,7 +47,7 @@ class  AuthAPI  {
   }
 
   /**
-   * 
+   *
    * Signs in a user with email and password.
    * @param email 
    * @param password 
@@ -59,7 +60,7 @@ class  AuthAPI  {
       }
       const emailDomain = email.split('@')[1] || 'unknown';
       logger.info('AuthAPI::signInWithPassword initiated', { emailDomain: emailDomain.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
-      const res = await axios.post(`${this.BASE_URL}/signin`, {email,password});
+      const res = await axios.post(`${this.BASE_URL}${this.API_PATH}/signin`, {email,password});
       logger.info('AuthAPI::signInWithPassword successful');
       const responseData = res.data;
       const signinData = responseData.data;
@@ -92,7 +93,7 @@ class  AuthAPI  {
       throw new Error('Token ID is required');
     }
     try {
-      const res = await axios.get(`${this.BASE_URL}/session?tokenId=${encodeURIComponent(tokenId)}`);
+      const res = await axios.get(`${this.BASE_URL}${this.API_PATH}/session?tokenId=${encodeURIComponent(tokenId)}`);
       logger.info('AuthAPI::getSessionByTokenId successful');
       
       const responseData = res.data;

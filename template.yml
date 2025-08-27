@@ -7,7 +7,7 @@ Parameters:
     Default: dev
   AuthServiceUrl:
     Type: String
-    Default: https://nk30ayxcy0.execute-api.us-east-1.amazonaws.com
+    Default: https://4n79knonfe.execute-api.us-east-1.amazonaws.com
   OrgServiceUrl:
     Type: String
     Default: https://b1fmewq9hl.execute-api.us-east-1.amazonaws.com

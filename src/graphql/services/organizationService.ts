@@ -33,7 +33,7 @@ class OrganizationService {
   }
 
   async findByName(name: string): Promise<Organization | null> {
-    if (!name || typeof name !== 'string') {
+    if (!name) {
       logger.error('OrganizationService::findByName failed - invalid name parameter');
       throw new Error('Name parameter is required and must be a string');
     }

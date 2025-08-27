@@ -3,11 +3,14 @@ import { createApiClient } from '../utils/apiClientFactory';
 import { logger } from '../utils/logger';
 
 const IAM_BASE_URL = process.env.USER_SERVICE_BASE_URL;
+
 if (!IAM_BASE_URL) {
   throw new Error('USER_SERVICE_BASE_URL environment variable is required');
 }
 
-const apiClient = createApiClient<User>(IAM_BASE_URL);
+const API_PATH = '/api/users';
+
+const apiClient = createApiClient<User>(`${IAM_BASE_URL}${API_PATH}`);
 
 export const userAPI = {
     ...apiClient,

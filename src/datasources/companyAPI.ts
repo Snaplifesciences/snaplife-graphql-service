@@ -6,12 +6,14 @@ import { logger } from '../utils/logger';
 
 dotenv.config();
 
-const BASE_URL = process.env.COMPANY_SERVICE_BASE_URL;
+const BASE_URL = process.env.COMPANY_SERVICE_BASE_URL|| 'http://localhost:8082';
 if (!BASE_URL) {
   throw new Error('COMPANY_SERVICE_BASE_URL environment variable is required');
 }
+const API_PATH = '/api/companies';
+logger.info('CompanyAPI::initialization', { BASE_URL, API_PATH });
 
-const apiClient = createApiClient<Company>(BASE_URL);
+const apiClient = createApiClient<Company>(`${BASE_URL}${API_PATH}`);
 
 export const companyAPI = {
   ...apiClient,

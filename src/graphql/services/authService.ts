@@ -18,18 +18,6 @@ class AuthService {
     }
   }
 
-  async invalidateSession(token: string): Promise<boolean> {
-    logger.info('AuthService::invalidateSession initiated', { tokenLength: token.length });
-    try {
-      // TODO: Implement logic to invalidate the session
-      logger.info('AuthService::invalidateSession completed successfully');
-      return true;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('AuthService::invalidateSession failed', { error: errorMessage });
-      throw wrapServiceError(error, 'Auth service failed while invalidating session');
-    }
-  }
 
   async getSessionByTokenId(tokenId: string): Promise<AuthApiSessionResponse> {
     logger.info('AuthService::getSessionByTokenId initiated', { tokenLength: tokenId.length });

@@ -2,6 +2,7 @@ export interface Organization {
   id: string;
   status: string;
   name: string;
+  country: string;
   addresses: OrganizationAddress[];
 }
 
@@ -22,12 +23,14 @@ export interface CreateOrganizationAddressInput extends Omit<OrganizationAddress
 
 export interface CreateOrganizationInput {
   name: string;
+  country: string;
   status: string;
   addresses?: CreateOrganizationAddressInput[];
 }
 
 export interface UpdateOrganizationInput {
   name?: string;
+  country?: string;
   status?: string;
   addresses?: CreateOrganizationAddressInput[];
 }

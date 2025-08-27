@@ -30,6 +30,7 @@ export const organizationTypeDefs = `#graphql
     city: String!
     state: String!
     postalCode: String!
+    country: String!
   }
 
   input UpdateOrganizationAddressInput {
@@ -40,6 +41,7 @@ export const organizationTypeDefs = `#graphql
     city: String
     state: String
     postalCode: String
+    country: String
   }
 
   type Organization {

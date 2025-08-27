@@ -1,17 +1,21 @@
 import { createApiClient } from '../utils/apiClientFactory';
 import { Organization } from '../graphql/types/organization';
 import { handleAxiosError } from '../error/apiErrorUtils';
+import { logger } from '../utils/logger';
 
-const BASE_URL = process.env.ORG_SERVICE_BASE_URL;
+const BASE_URL = process.env.ORG_SERVICE_BASE_URL|| 'http://localhost:8081';
+
 if (!BASE_URL) {
   throw new Error('ORG_SERVICE_BASE_URL environment variable is required');
 }
+const API_PATH = '/api/organizations';
 
-const apiClient = createApiClient<Organization>(BASE_URL);
+logger.info('OrganizationAPI::initialization', { BASE_URL, API_PATH });
+
+const apiClient = createApiClient<Organization>(`${BASE_URL}${API_PATH}`);
 
 export const organizationAPI = {
   ...apiClient,
-
 
   async findByName(name: string): Promise<Organization | null> {
     const sanitizedName = name.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '');
