@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BackendError, ApiError, ServiceError } from '../types/errors';
+import { BackendError, ApiError, ServiceError } from './errors';
 
 
 export function mustExist<T>(value: T | null | undefined, error: Error): T {

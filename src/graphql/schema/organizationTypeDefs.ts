@@ -1,8 +1,6 @@
 export const organizationTypeDefs = `#graphql
   type Query {
-    getOrganizationById(id: ID!): Organization
-    getOrganizations: [Organization!]!
-    findOrganizationByName(name: String!): Organization
+    organizations: [Organization!]!
   }
 
   type Mutation {
@@ -15,24 +13,33 @@ export const organizationTypeDefs = `#graphql
     name: String!
     country: String!
     status: String!
-    addresses: [OrganizationAddressInput!]
+    addresses: [CreateOrganizationAddressInput!]
   }
 
   input UpdateOrganizationInput {
     name: String
     country: String
     status: String
-    addresses: [OrganizationAddressInput!]
+    addresses: [UpdateOrganizationAddressInput!]
   }
 
-  input OrganizationAddressInput {
+  input CreateOrganizationAddressInput {
     addressLine1: String!
     addressLine2: String
     addressLine3: String
     city: String!
     state: String!
     postalCode: String!
-    country: String!
+  }
+
+  input UpdateOrganizationAddressInput {
+    id: ID!
+    addressLine1: String
+    addressLine2: String
+    addressLine3: String
+    city: String
+    state: String
+    postalCode: String
   }
 
   type Organization {
@@ -56,10 +63,4 @@ export const organizationTypeDefs = `#graphql
     country: String!
   }
 
-  type OrganizationSummary {
-    id: ID!
-    name: String!
-    status: String!
-    country: String!
-  }
 `;

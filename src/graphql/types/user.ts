@@ -11,18 +11,9 @@ export interface User {
 }
 
 export interface UserRole {
-  role: string;
+  name: string;
+  active: boolean;
   permissions?: string;
-}
-
-export interface OrganizationSummary {
-  id: string;
-  name: string;
-}
-
-export interface CompanySummary {
-  id: string;
-  name: string;
 }
 
 export interface CreateUserInput {
@@ -42,5 +33,5 @@ export interface UpdateUserInput {
 
 export interface ActivationInput {
   password?: string;
-  [key: string]: unknown;
+  confirmPassword?: string;
 }

@@ -11,7 +11,7 @@ const server = new ApolloServer({
     logger.error('GraphQL Error', formattedError);
     
     // Remove stacktrace and create sanitized error
-    const { stacktrace, ...extensionsWithoutStacktrace } = formattedError.extensions || {};
+    const { ...extensionsWithoutStacktrace } = formattedError.extensions || {};
     const errorCode = (formattedError.extensions?.code === 'INTERNAL_SERVER_ERROR' && formattedError.extensions?.status)
       ? formattedError.extensions.status
       : formattedError.extensions?.code;

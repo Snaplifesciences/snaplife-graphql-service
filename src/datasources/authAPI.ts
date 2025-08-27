@@ -1,15 +1,49 @@
 import axios from 'axios';
-import { handleAxiosError } from '../utils/apiErrorUtils';
-import { SignInResponse, SessionResponse } from '../graphql/typeDefs/auth';
+import { handleAxiosError } from '../error/apiErrorUtils';
 import { logger } from '../utils/logger';
 
-if (!process.env.AUTH_SERVICE_BASE_URL) {
-  throw new Error('AUTH_SERVICE_BASE_URL environment variable is required');
+// API Response Types
+export interface UserRole {
+  name: string;
+  active: boolean;
+  permissions: Record<string, unknown>;
 }
-const BASE_URL = process.env.AUTH_SERVICE_BASE_URL;
 
+export interface AuthApiSignInResponse {
+  success: boolean;
+  message: string;
+  tokenId: string;
+  user: {
+    id: string;
+    email: string;
+    companyId?: string | null;
+    organizationId?: string | null;
+    userId?: string | null;
+    roles: UserRole[] | null;
+  };
+}
+
+export interface AuthApiSessionResponse {
+  user: {
+    id: string;
+    email: string;
+    companyId?: string | null;
+    userId?: string | null;
+    [k: string]: unknown;
+  };
+  accessToken: string;
+  expired: boolean;
+}
 
 class  AuthAPI  {
+  private BASE_URL: string;
+
+  constructor() {
+    if (!process.env.AUTH_SERVICE_BASE_URL) {
+      throw new Error('AUTH_SERVICE_BASE_URL environment variable is required');
+    }
+    this.BASE_URL = process.env.AUTH_SERVICE_BASE_URL;
+  }
 
   /**
    * 
@@ -18,14 +52,15 @@ class  AuthAPI  {
    * @param password 
    * @returns 
    */
-  async signInWithPassword(email: string, password: string): Promise<SignInResponse> {
+  async signInWithPassword(email: string, password: string): Promise<AuthApiSignInResponse> {
     try {
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
-      logger.info('Signing in user');
-      const res = await axios.post(`${BASE_URL}/signin`, {email,password});
-      logger.info('Sign-in successful');
+      const emailDomain = email.split('@')[1] || 'unknown';
+      logger.info('AuthAPI::signInWithPassword initiated', { emailDomain: emailDomain.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
+      const res = await axios.post(`${this.BASE_URL}/signin`, {email,password});
+      logger.info('AuthAPI::signInWithPassword successful');
       const responseData = res.data;
       const signinData = responseData.data;
       
@@ -40,7 +75,8 @@ class  AuthAPI  {
         user: signinData.user
       };
     } catch (error) {
-      logger.error('Error during sign-in', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('AuthAPI::signInWithPassword failed', { error: errorMessage.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
       throw handleAxiosError(error, 'Failed to sign in user');
     }
   }
@@ -50,11 +86,14 @@ class  AuthAPI  {
    * @param tokenId 
    * @returns 
    */
-  async getSessionByTokenId(tokenId: string): Promise<SessionResponse> {
-    logger.info('Getting session by tokenId');
+  async getSessionByTokenId(tokenId: string): Promise<AuthApiSessionResponse> {
+    logger.info('AuthAPI::getSessionByTokenId initiated', { tokenIdLength: tokenId.length });
+    if (!tokenId || tokenId.trim() === '') {
+      throw new Error('Token ID is required');
+    }
     try {
-      const res = await axios.get(`${BASE_URL}/verify?tokenId=${encodeURIComponent(tokenId)}`);
-      logger.info('Session verification successful');
+      const res = await axios.get(`${this.BASE_URL}/session?tokenId=${encodeURIComponent(tokenId)}`);
+      logger.info('AuthAPI::getSessionByTokenId successful');
       
       const responseData = res.data;
       const sessionData = responseData.data;
@@ -69,7 +108,8 @@ class  AuthAPI  {
         accessToken: sessionData.accessToken || tokenId
       };
     } catch (error) {
-      logger.error('Error verifying session', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('AuthAPI::getSessionByTokenId failed', { error: errorMessage.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
       throw handleAxiosError(error, 'Failed to verify session');
     }
   }

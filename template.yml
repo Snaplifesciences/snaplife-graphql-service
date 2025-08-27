@@ -62,9 +62,10 @@ Resources:
           ThrottlingRateLimit: 100
           ThrottlingBurstLimit: 200
       Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
-        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowMethods: "'*'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,tokenId'"
         AllowOrigin: "'*'"
+        AllowCredentials: "'true'"
 
 Outputs:
   GraphQLApiUrl:

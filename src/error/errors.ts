@@ -11,7 +11,7 @@ interface BaseErrorParams {
   httpStatus?: number;
   debugMessage?: string;
   timestamp?: string;
-  [key: string]: unknown;
+  extensions?: Record<string, unknown>;
 }
 
 class BaseError extends Error {
@@ -28,17 +28,12 @@ class BaseError extends Error {
     this.httpStatus = params.httpStatus;
     this.debugMessage = params.debugMessage;
     this.timestamp = params.timestamp;
-    const { message, status, httpStatus, debugMessage, timestamp, ...otherParams } = params;
-    this.extensions = { ...otherParams };
+    this.extensions = params.extensions;
   }
 }
 
-interface ApiErrorParams extends BaseErrorParams {
-  httpStatus?: number;
-}
-
 export class ApiError extends BaseError {
-  constructor(params: ApiErrorParams) {
+  constructor(params: BaseErrorParams) {
     super("ApiError", params);
   }
 }

@@ -6,10 +6,10 @@ export const userTypeDefs = `#graphql
     }
 
     type Mutation {
-        createUser(input: UserInput!): User!
-        updateUser(id: ID!, input: UserInput!): User
+        createUser(input: CreateUserInput!): User!
+        updateUser(id: ID!, input: UpdateUserInput!): User
         deleteUser(id: ID!): Boolean!
-        activateUser(activationToken: String!, input: JSONObject!): Boolean!
+        setupProfile(activationToken: String!, input: SetupProfileInput!): Boolean!
         resendActivationToken(activationToken: String!): Boolean!
         validateActivationToken(activationToken: String!): Boolean!
     }
@@ -24,20 +24,53 @@ export const userTypeDefs = `#graphql
         roles: [UserRole!]!
         organizationId: ID!
         companyId: ID!
+        organization: Organization
+        company: Company
     }
 
     type UserRole {
-        role: String!
+        name: String!
+        active: Boolean!
         permissions: JSONObject
     }
 
-    input UserInput {
+    input CreateUserInput {
         email: String!
         firstName: String!
         lastName: String!
         status: String
+        roles: [CreateUserRoleInput!]!
         attributes: JSONObject
         organizationId: ID!
         companyId: ID!
     }
+
+    input UpdateUserInput {
+        email: String
+        firstName: String
+        lastName: String
+        status: String
+        roles: [UpdateUserRoleInput!]!
+        attributes: JSONObject
+        organizationId: ID!
+        companyId: ID!
+    }
+
+    input CreateUserRoleInput {
+        name: String!
+        active: Boolean!
+        permissions: JSONObject
+    }
+
+    input UpdateUserRoleInput {
+        name: String
+        active: Boolean
+        permissions: JSONObject
+    }
+
+    input SetupProfileInput {
+        password: String!
+        confirmPassword: String!
+    }
+
 `;

@@ -1,15 +1,11 @@
-// src/services/userService.ts
-import { User } from "../typeDefs/user";
-import { ActivationInput } from "../typeDefs/user";
-import { userAPI } from "../../datasources/userAPI";
-import { wrapServiceError } from '../../utils/apiErrorUtils';
+import { userAPI } from '../../datasources/userAPI';
+import { wrapServiceError } from '../../error/apiErrorUtils';
 import { logger } from '../../utils/logger';
-
-
+import { CreateUserInput, UpdateUserInput, User, ActivationInput } from '../types/user';
 
 class UserService {
 
-  async createUser(user: User): Promise<User> {
+  async createUser(user: CreateUserInput): Promise<User> {
     const sanitizedUser = {
       email: user.email?.replace(/[\r\n]/g, '') || 'unknown',
       firstName: user.firstName || 'unknown',
@@ -17,11 +13,12 @@ class UserService {
     };
     logger.info('UserService::createUser initiated', { user: sanitizedUser });
     try {
-      const result = await userAPI.create(user);
+      const result = await userAPI.create(user as Partial<User>);
       logger.info('UserService::createUser completed successfully', { userId: result.id });
       return result;
     } catch (error) {
-      logger.error('UserService::createUser failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::createUser failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while creating user');
     }
   }
@@ -33,7 +30,8 @@ class UserService {
       logger.info('UserService::fetchUsers completed successfully', { count: result.length });
       return result;
     } catch (error) {
-      logger.error('UserService::fetchUsers failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::fetchUsers failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while getting all the users');
     }
   }
@@ -45,19 +43,24 @@ class UserService {
       logger.info('UserService::getAuthenticatedUserById completed successfully', { userId: id });
       return result;
     } catch (error) {
-      logger.error('UserService::getAuthenticatedUserById failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::getAuthenticatedUserById failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while getting authenticated user by id');
     }
   }
 
-  async modifyUser(id: string, updatedUser: Partial<User>): Promise<User | null> {
+  async modifyUser(id: string, updatedUser: UpdateUserInput): Promise<User | null> {
+    if (!updatedUser || typeof updatedUser !== 'object') {
+      throw new Error('Invalid user data: must be a valid object');
+    }
     logger.info('UserService::modifyUser initiated', { userId: id });
     try {
-      const result = await userAPI.update(id, updatedUser);
+      const result = await userAPI.update(id, updatedUser as Partial<User>);
       logger.info('UserService::modifyUser completed successfully', { userId: id });
       return result;
     } catch (error) {
-      logger.error('UserService::modifyUser failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::modifyUser failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while updating user');
     }
   }
@@ -69,20 +72,23 @@ class UserService {
       logger.info('UserService::removeUser completed successfully', { userId: id });
       return true;
     } catch (error) {
-      logger.error('UserService::removeUser failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::removeUser failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while deleting user');
     }
   }
 
-  async activateUser(activationToken: string, input: ActivationInput): Promise<boolean> {
-    logger.info('UserService::activateUser initiated');
+  async setupProfile(activationToken: string, input: ActivationInput): Promise<boolean> {
+    const sanitizedToken = activationToken.substring(0, 8) + '...';
+    logger.info('UserService::setupProfile initiated', { activationToken: sanitizedToken });
     try {
       await userAPI.activateUser(activationToken, input);
-      logger.info('UserService::activateUser completed successfully');
+      logger.info('UserService::setupProfile completed successfully', { activationToken: sanitizedToken });
       return true;
     } catch (error) {
-      logger.error('UserService::activateUser failed', error);
-      throw wrapServiceError(error, 'User service failed while activating user');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::setupProfile failed', { error: errorMessage });
+      throw wrapServiceError(error, 'User service failed while setting up profile');
     }
   }
 
@@ -92,7 +98,8 @@ class UserService {
       await userAPI.resendActivationToken(activationToken);
       logger.info('UserService::resendActivationToken completed successfully');
     } catch (error) {
-      logger.error('UserService::resendActivationToken failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::resendActivationToken failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while resending activation token');
     }
     return true;
@@ -105,7 +112,8 @@ class UserService {
       logger.info('UserService::validateToken completed successfully');
       return true;
     } catch (error) {
-      logger.error('UserService::validateToken failed', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('UserService::validateToken failed', { error: errorMessage });
       throw wrapServiceError(error, 'User service failed while validating token');
     }
   }

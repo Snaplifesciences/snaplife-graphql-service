@@ -1,13 +1,23 @@
 
 import { GraphQLFieldResolver } from 'graphql';
-import { ForbiddenError, AuthenticationError } from 'apollo-server-errors';
+import { GraphQLError } from 'graphql';
 
-type User = {
-  role: string;
-  permissions?: Record<string, boolean>;
+export type UserRole = {
+  active: boolean;
+  name: string;
+  permissions: Record<string, boolean>;
 };
 
-type Context = {
+export type User = {
+  id: string;
+  email: string;
+  userId: string;
+  companyId: string;
+  organizationId: string;
+  roles: UserRole[];
+};
+
+export type Context = {
   user?: User;
 };
 
@@ -20,16 +30,48 @@ export const withRBACAsync = <TSource = any, TContext = Context, TArgs = any>(
       const user = context.user;
 
       if (!user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
       }
       
-      if (!allowedRoles.includes(user.role)) {
-        throw new ForbiddenError(`Insufficient role permissions. Required: ${allowedRoles.join(', ')}`);
+      if (allowedRoles.length === 0) {
+        throw new GraphQLError('No roles specified for authorization', {
+          extensions: { code: 'FORBIDDEN' }
+        });
+      }
+      
+      const activeRoles = user.roles.filter(role => role.active);
+      
+      // Check for required permissions first
+      for (const perm of requiredPermissions) {
+        const hasPermission = activeRoles.some(role => 
+          role.permissions?.[perm] === true
+        );
+        if (!hasPermission) {
+          throw new GraphQLError(`Missing required permission: ${perm}`, {
+            extensions: { 
+              code: 'FORBIDDEN',
+              requiredPermission: perm,
+              userPermissions: activeRoles.map(r => Object.keys(r.permissions)).flat()
+            }
+          });
+        }
       }
 
-      for (const perm of requiredPermissions) {
-        if (!user.permissions?.[perm]) {
-          throw new ForbiddenError(`Missing required permission: ${perm}`);
+      // If specific roles are required, check those too
+      if (allowedRoles.length > 0) {
+        const userRoleNames = activeRoles.map(role => role.name);
+        const hasRequiredRole = allowedRoles.some(role => userRoleNames.includes(role));
+        
+        if (!hasRequiredRole) {
+          throw new GraphQLError(`Insufficient role permissions. Required: ${allowedRoles.join(', ')}`, {
+            extensions: { 
+              code: 'FORBIDDEN',
+              requiredRoles: allowedRoles,
+              userRoles: userRoleNames
+            }
+          });
         }
       }
 

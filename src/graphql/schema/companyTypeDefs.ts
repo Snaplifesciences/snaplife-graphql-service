@@ -1,9 +1,7 @@
 export const companyTypeDefs = `#graphql
   type Query {
+    companies: [Company!]!
     getCompanyById(id: ID!): Company
-    findCompanyByName(name: String!): Company
-    getAllCompanies: [Company!]!
-    getCompaniesByOrganizationId(organizationId: ID!): [Company!]!
   }
 
   type Mutation {
@@ -123,9 +121,4 @@ export const companyTypeDefs = `#graphql
     addressType: String
   }
 
-  type CompanySummary {
-    id: ID!
-    name: String!
-    status: String!
-  }
 `;

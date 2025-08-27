@@ -5,8 +5,8 @@ set -e
 ENV=${1:-dev}
 echo "🌍 Deploying to environment: $ENV"
 
-echo "🔨 Building TypeScript..."
-if ! npm run build:lambda; then
+echo "🔨 Building and packaging..."
+if ! ./deploy.sh; then
     echo "❌ Build failed! Aborting deployment."
     exit 1
 fi

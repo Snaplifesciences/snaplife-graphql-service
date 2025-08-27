@@ -3,22 +3,26 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "build:lambda": "tsc && cp package.json dist/",
+    "build:lambda": "tsc && cp package.json dist/ && cd dist && npm install --production",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "package:lambda": "npm run build:lambda && cd dist && npm install --production && zip -r ../lambda-deployment.zip ."
+    "package:lambda": "npm run build:lambda && cd dist && zip -r ../lambda-deployment.zip ."
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",
     "@as-integrations/aws-lambda": "^3.1.0",
-    "apollo-server": "^3.13.0",
-    "apollo-server-errors": "^3.3.1",
     "axios": "^1.10.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
+    "express": "^4.17.1",
     "graphql": "^16.11.0",
     "graphql-type-json": "^0.3.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.23",
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
 }

@@ -1,13 +1,6 @@
-import axios from "axios";
-import { User } from "../graphql/typeDefs/user";
+import { ActivationInput, User } from "../graphql/types/user";
 import { createApiClient } from '../utils/apiClientFactory';
-import { handleAxiosError } from '../utils/apiErrorUtils';
 import { logger } from '../utils/logger';
-
-interface ActivationRequest {
-  password?: string;
-  [key: string]: any;
-}
 
 const IAM_BASE_URL = process.env.USER_SERVICE_BASE_URL;
 if (!IAM_BASE_URL) {
@@ -36,9 +29,9 @@ export const userAPI = {
         };
     },
 
-    async activateUser(activationToken: string, requestBody: ActivationRequest): Promise<void> {
+    async activateUser(activationToken: string, input: ActivationInput): Promise<void> {
         logger.info('UserAPI::activateUser initiated');
-        await apiClient.get(`/activate/${activationToken}`);
+        await apiClient.get(`/activate/${encodeURIComponent(activationToken)}`);
         logger.info('UserAPI::activateUser completed successfully');
     },
 
