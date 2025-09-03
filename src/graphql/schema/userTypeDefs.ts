@@ -3,15 +3,20 @@ export const userTypeDefs = `#graphql
     extend type Query {
         getUsers: [User!]!
         getAuthenticatedUserById(id: ID!): User
+        validateActivationToken(activationToken: String!): StatusResponse!
     }
 
     extend type Mutation {
         createUser(input: CreateUserInput!): User!
         updateUser(id: ID!, input: UpdateUserInput!): User
         deleteUser(id: ID!): Boolean!
-        activateAccount(activationToken: String!, input: ActivateAccountInput!): Boolean!
-        resendActivationToken(activationToken: String!): Boolean!
-        validateActivationToken(activationToken: String!): Boolean!
+        activateAccount(activationToken: String!, input: ActivateAccountInput!): StatusResponse!
+        resendActivationToken(activationToken: String!): StatusResponse!
+    }
+
+    type StatusResponse {
+        success: Boolean!
+        message: String
     }
   
     type User {

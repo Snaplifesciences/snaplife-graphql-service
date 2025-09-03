@@ -109,7 +109,12 @@ export const userResolver = {
       });
 
       return targetUser;
-    })
+    }),
+
+    // This query is public as it's used to validate an activation token
+    // before a user is authenticated.
+    validateActivationToken: (_: any, { activationToken }: { activationToken: string }) =>
+      userService.validateToken(activationToken)
   },
 
   Mutation: {
@@ -247,27 +252,13 @@ export const userResolver = {
       return userService.removeUser(id);
     }),
 
-    // Restricted: Only authenticated users with appropriate roles/permissions can activate
-    activateAccount: withRBACAsync(
-      [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN, ROLES.USER],
-      [PERMISSIONS.MANAGE_USERS]
-    )((_: any, { activationToken, input }: { activationToken: string; input: any }) =>
-      userService.setupProfile(activationToken, input)
-    ),
+    // These mutations are public as they are used for account activation
+    // by users who are not yet authenticated.
+    activateAccount: (_: any, { activationToken, input }: { activationToken: string; input: any }) =>
+      userService.setupProfile(activationToken, input),
 
-    resendActivationToken: withRBACAsync(
-      [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN, ROLES.USER],
-      [PERMISSIONS.MANAGE_USERS]
-    )((_: any, { activationToken }: { activationToken: string }) =>
+    resendActivationToken: (_: any, { activationToken }: { activationToken: string }) =>
       userService.resendActivationToken(activationToken)
-    ),
-
-    validateActivationToken: withRBACAsync(
-      [ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN, ROLES.USER],
-      [PERMISSIONS.MANAGE_USERS]
-    )((_: any, { activationToken }: { activationToken: string }) =>
-      userService.validateToken(activationToken)
-    )
   }
 
 };

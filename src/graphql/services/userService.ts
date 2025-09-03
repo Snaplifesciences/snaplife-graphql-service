@@ -1,10 +1,9 @@
-import { userAPI } from '../../datasources/userAPI';
+import { userAPI, StatusResponse } from '../../datasources/userAPI';
 import { wrapServiceError } from '../../error/apiErrorUtils';
 import { logger } from '../../utils/logger';
 import { CreateUserInput, UpdateUserInput, User, ActivateAccountInput } from '../types/user';
 
 class UserService {
-
   async createUser(user: CreateUserInput): Promise<User> {
     const sanitizedUser = {
       email: user.email?.replace(/[\r\n]/g, '') || 'unknown',
@@ -78,44 +77,23 @@ class UserService {
     }
   }
 
-  async setupProfile(activationToken: string, input: ActivateAccountInput): Promise<boolean> {
+  async setupProfile(activationToken: string, input: ActivateAccountInput): Promise<StatusResponse> {
     const sanitizedToken = activationToken.substring(0, 8) + '...';
     logger.info('UserService::setupProfile initiated', { activationToken: sanitizedToken });
-    try {
-      await userAPI.activateUser(activationToken, input);
-      logger.info('UserService::setupProfile completed successfully', { activationToken: sanitizedToken });
-      return true;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('UserService::setupProfile failed', { error: errorMessage });
-      throw wrapServiceError(error, 'User service failed while setting up profile');
-    }
+    // The API layer now handles errors gracefully and returns a status object.
+    return userAPI.activateUser(activationToken, input);
   }
 
-  async resendActivationToken(activationToken: string): Promise<boolean> {
+  async resendActivationToken(activationToken: string): Promise<StatusResponse> {
     logger.info('UserService::resendActivationToken initiated');
-    try {
-      await userAPI.resendActivationToken(activationToken);
-      logger.info('UserService::resendActivationToken completed successfully');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('UserService::resendActivationToken failed', { error: errorMessage });
-      throw wrapServiceError(error, 'User service failed while resending activation token');
-    }
-    return true;
+    // The API layer now handles errors gracefully and returns a status object.
+    return userAPI.resendActivationToken(activationToken);
   }
 
-  async validateToken(activationToken: string): Promise<boolean> {
+  async validateToken(activationToken: string): Promise<StatusResponse> {
     logger.info('UserService::validateToken initiated');
-    try {
-      await userAPI.validateToken(activationToken);
-      logger.info('UserService::validateToken completed successfully');
-      return true;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('UserService::validateToken failed', { error: errorMessage });
-      throw wrapServiceError(error, 'User service failed while validating token');
-    }
+    // The API layer now handles errors gracefully and returns a status object.
+    return userAPI.validateToken(activationToken);
   }
 
 }

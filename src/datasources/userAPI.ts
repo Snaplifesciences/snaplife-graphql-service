@@ -1,8 +1,15 @@
 import { ActivateAccountInput, User } from "../graphql/types/user";
 import { createApiClient } from '../utils/apiClientFactory';
 import { logger } from '../utils/logger';
+import axios, { AxiosError } from 'axios';
+import { BackendError } from "../error/errors";
 
 const IAM_BASE_URL = process.env.USER_SERVICE_BASE_URL;
+
+export interface StatusResponse {
+    success: boolean;
+    message?: string;
+}
 
 if (!IAM_BASE_URL) {
   throw new Error('USER_SERVICE_BASE_URL environment variable is required');
@@ -10,7 +17,13 @@ if (!IAM_BASE_URL) {
 
 const API_PATH = '/api/users';
 
+// Standard client for resource-based operations (create, getById, etc.)
 const apiClient = createApiClient<User>(`${IAM_BASE_URL}${API_PATH}`);
+
+// A separate, configured axios instance for custom actions like activation
+// that don't fit the standard resource pattern of `apiClient`.
+// Ideally, the `apiClient` itself would expose generic post/put methods.
+const customActionClient = axios.create({ baseURL: `${IAM_BASE_URL}${API_PATH}` });
 
 export const userAPI = {
     ...apiClient,
@@ -32,33 +45,51 @@ export const userAPI = {
         };
     },
 
-    async activateUser(activationToken: string, input: ActivateAccountInput): Promise<void> {
+    async activateUser(activationToken: string, input: ActivateAccountInput): Promise<StatusResponse> {
         logger.info('UserAPI::activateUser initiated');
-        // Switch to POST request with payload as per new requirement
         const path = `/activate/${encodeURIComponent(activationToken)}`;
         const body = {
             password: input?.password,
             confirmPassword: input?.confirmPassword
         };
-        const baseUrl = process.env.USER_SERVICE_BASE_URL;
-        if (!baseUrl) {
-            throw new Error('USER_SERVICE_BASE_URL environment variable is required');
+        try {
+            await customActionClient.post(path, body);
+            logger.info('UserAPI::activateUser completed successfully');
+            return { success: true, message: 'Account activated successfully.' };
+        } catch (error) {
+            const err = error as AxiosError<BackendError>;
+            const message = err.response?.data?.debugMessage || 'Failed to activate account.';
+            logger.error('UserAPI::activateUser failed', { error: err.message, response: err.response?.data });
+            return { success: false, message };
         }
-        const url = `${baseUrl}${API_PATH}${path}`;
-        const axios = require('axios');
-        await axios.post(url, body);
-        logger.info('UserAPI::activateUser completed successfully');
     },
 
-    async resendActivationToken(activationToken: string): Promise<void> {
+    async resendActivationToken(activationToken: string): Promise<StatusResponse> {
         logger.info('UserAPI::resendActivationToken initiated');
-        await apiClient.get(`/resend/${activationToken}`);
-        logger.info('UserAPI::resendActivationToken completed successfully');
+        try {
+            await apiClient.get(`/${activationToken}/activation/resend`);
+            logger.info('UserAPI::resendActivationToken completed successfully');
+            return { success: true, message: 'Activation token has been resent.' };
+        } catch (error) {
+            const err = error as AxiosError<BackendError>;
+            const message = err.response?.data?.debugMessage || 'Failed to resend activation token.';
+            logger.error('UserAPI::resendActivationToken failed', { error: err.message, response: err.response?.data });
+            return { success: false, message };
+        }
     },
     
-    async validateToken(activationToken: string): Promise<void> {
+    async validateToken(activationToken: string): Promise<StatusResponse> {
         logger.info('UserAPI::validateToken initiated');
-        await apiClient.get(`?activationToken=${encodeURIComponent(activationToken)}`);
-        logger.info('UserAPI::validateToken completed successfully');
+        const path = `/activation/validate?activationToken=${encodeURIComponent(activationToken)}`;
+        try {
+            await apiClient.get(path);
+            logger.info('UserAPI::validateToken completed successfully');
+            return { success: true, message: 'Token is valid.' };
+        } catch (error) {
+            const err = error as AxiosError<BackendError>;
+            const message = err.response?.data?.debugMessage || 'Token is invalid or has expired.';
+            logger.error('UserAPI::validateToken failed', { error: err.message, response: err.response?.data });
+            return { success: false, message };
+        }
     }
 };
