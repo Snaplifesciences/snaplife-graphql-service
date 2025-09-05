@@ -6,6 +6,8 @@ export const authTypeDefs = `#graphql
 
   extend type Mutation {
     signIn(input: SignInInput!): SignInResponse
+    refreshToken: RefreshTokenResponse
+    logout: LogoutResponse
   }
 
   input SignInInput {
@@ -18,6 +20,16 @@ export const authTypeDefs = `#graphql
     user: User!
     company: Company
     organization: Organization
+  }
+
+  type RefreshTokenResponse {
+    tokenId: String!
+    success: Boolean!
+  }
+
+  type LogoutResponse {
+    success: Boolean!
+    message: String!
   }
   
 `;

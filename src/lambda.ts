@@ -72,7 +72,10 @@ const graphqlHandler = startServerAndCreateLambdaHandler(
             companyId: session.user.companyId || '',
             organizationId: session.user.organizationId || '',
             roles: session.user.roles || []
-          }
+          },
+          tokenId: token,
+          event,
+          token: authHeader
         };
         
         return userContext;

@@ -59,5 +59,48 @@ export const authResolver = {
         organization,
       };
     },
+
+    refreshToken: async (_: any, __: any, context: any) => {
+      // Use tokenId from context (already authenticated)
+      const token = context?.tokenId;
+      
+      logger.info('AuthResolver::refreshToken initiated', { 
+        hasToken: !!token,
+        tokenLength: token?.length,
+        hasUser: !!context?.user
+      });
+      
+      if (!token) {
+        throw new GraphQLError('Authorization token required', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const result = await authenticationService.refreshToken(token);
+      logger.info('AuthResolver::refreshToken completed successfully');
+      
+      return result;
+    },
+
+    logout: async (_: any, __: any, context: any) => {
+      const token = context?.tokenId;
+      
+      logger.info('AuthResolver::logout initiated', { 
+        hasToken: !!token,
+        tokenLength: token?.length
+      });
+      
+      if (!token) {
+        throw new GraphQLError('Authorization token required', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
+      const result = await authenticationService.logout(token);
+      logger.info('AuthResolver::logout completed successfully');
+      
+      return result;
+    },
+
   },
 };

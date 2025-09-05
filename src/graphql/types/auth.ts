@@ -16,5 +16,15 @@ export interface UserRole {
   permissions: Record<string, unknown>;
 }
 
+export interface RefreshTokenResponse {
+  tokenId: string;
+  success: boolean;
+}
+
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+}
+
 
 

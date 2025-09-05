@@ -101,7 +101,7 @@ class  AuthAPI  {
       throw new Error('Token ID is required');
     }
     try {
-      const res = await axios.get(`${this.BASE_URL}${this.API_PATH}/session?tokenId=${encodeURIComponent(tokenId)}`);
+      const res = await axios.get(`${this.BASE_URL}${this.API_PATH}/verify?tokenId=${encodeURIComponent(tokenId)}`);
       logger.info('AuthAPI::getSessionByTokenId successful');
       
       const responseData = res.data;
@@ -121,7 +121,71 @@ class  AuthAPI  {
       logger.error('AuthAPI::getSessionByTokenId failed', { error: errorMessage.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
       throw handleAxiosError(error, 'Failed to verify session');
     }
+
   }
+
+  /**
+   * Refreshes the access token using Bearer token.
+   * @param token 
+   * @returns 
+   */
+  async refreshToken(token: string): Promise<{ tokenId: string; success: boolean }> {
+    logger.info('AuthAPI::refreshToken initiated');
+    if (!token || token.trim() === '') {
+      throw new Error('Token is required');
+    }
+    try {
+      const res = await axios.post(`${this.BASE_URL}${this.API_PATH}/refresh`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      logger.info('AuthAPI::refreshToken successful');
+      
+      const responseData = res.data;
+      return {
+        tokenId: responseData.data?.accessToken || responseData.data?.tokenId,
+        success: responseData.success || false
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('AuthAPI::refreshToken failed', { error: errorMessage.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
+      throw handleAxiosError(error, 'Failed to refresh token');
+    }
+
+  }
+
+  /**
+   * Logs out the user using Bearer token.
+   * @param token 
+   * @returns 
+   */
+  async logout(token: string): Promise<{ success: boolean; message: string }> {
+    logger.info('AuthAPI::logout initiated');
+    if (!token || token.trim() === '') {
+      throw new Error('Token is required');
+    }
+    try {
+      const res = await axios.post(`${this.BASE_URL}${this.API_PATH}/logout`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      logger.info('AuthAPI::logout successful');
+      
+      const responseData = res.data;
+      return {
+        success: responseData.success || false,
+        message: responseData.message || 'Logged out successfully'
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('AuthAPI::logout failed', { error: errorMessage.replace(/[\r\n\t\x00-\x1f\x7f-\x9f]/g, '') });
+      throw handleAxiosError(error, 'Failed to logout');
+    }
+  }
+
+
 }
 
 export default new AuthAPI();
