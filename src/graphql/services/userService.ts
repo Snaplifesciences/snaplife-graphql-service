@@ -96,6 +96,15 @@ class UserService {
     return userAPI.validateToken(activationToken);
   }
 
+    async getUserCounts(companyId?: string, organizationId?: string) {
+        logger.info('Fetching user counts', { companyId, organizationId });
+        try {
+            return await userAPI.getUserCounts(companyId, organizationId);
+        } catch (error) {
+            throw wrapServiceError(error, 'Failed to fetch user counts');
+        }
+    }
+
 }
 
 export default new UserService();

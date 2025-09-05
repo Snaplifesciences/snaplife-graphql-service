@@ -1,6 +1,14 @@
 export const organizationTypeDefs = `#graphql
   extend type Query {
     organizations: [Organization!]!
+    dashboardStats: DashboardStats!
+  }
+
+  type DashboardStats {
+    activeOrganizations: Int!
+    registeredCompanies: Int!
+    invitedUsers: Int!
+    activeUsers: Int!
   }
 
   extend type Mutation {

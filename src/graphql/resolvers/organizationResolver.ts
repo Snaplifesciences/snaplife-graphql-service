@@ -1,4 +1,6 @@
 import organizationService from '../services/organizationService';
+import companyService from '../services/companyService';
+import userService from '../services/userService';
 import { logger } from '../../utils/logger';
 import { GraphQLError } from 'graphql';
 import { ROLES, PERMISSIONS } from '../../utils/rbacUtils';
@@ -62,6 +64,64 @@ export const organizationResolver = {
       throw new GraphQLError('Insufficient permissions', {
         extensions: { code: 'FORBIDDEN' }
       });
+    }),
+
+    dashboardStats: withRBACAsync([ROLES.PLATFORM_ADMIN, ROLES.ORGANIZATION_ADMIN, ROLES.COMPANY_ADMIN], [])(async (_: any, __: any, context: Context) => {
+      const { user } = context;
+      logger.info('OrganizationResolver::dashboardStats — fetching aggregated data', {
+        userId: user?.id,
+        organizationId: user?.organizationId,
+        companyId: user?.companyId
+      });
+      
+      try {
+        const isPlatformAdmin = user?.roles.some((role: UserRole) => 
+          role.active && role.name === ROLES.PLATFORM_ADMIN
+        );
+
+        let organizationFilter: string | undefined;
+        let companyFilter: string | undefined;
+
+        if (!isPlatformAdmin) {
+          organizationFilter = user?.organizationId;
+          companyFilter = user?.companyId;
+        }
+
+        const [organizations, companies, userCounts] = await Promise.all([
+          organizationFilter 
+            ? organizationService.getById(organizationFilter).then(org => org ? [org] : [])
+            : organizationService.getOrganizations(),
+          companyFilter
+            ? companyService.getAllByOrganizationId(organizationFilter || '').then(comps => comps || [])
+            : companyService.getCompanies(),
+          userService.getUserCounts(companyFilter, organizationFilter)
+        ]);
+
+        const activeOrganizations = organizations.filter(org => org.status === 'ACTIVE').length;
+        const registeredCompanies = companies.length;
+        const { invitedUsers, activeUsers } = userCounts;
+
+        logger.info('OrganizationResolver::dashboardStats — aggregation complete', {
+          activeOrganizations,
+          registeredCompanies,
+          invitedUsers,
+          activeUsers,
+          organizationFilter,
+          companyFilter
+        });
+
+        return {
+          activeOrganizations,
+          registeredCompanies,
+          invitedUsers,
+          activeUsers
+        };
+      } catch (error) {
+        logger.error('OrganizationResolver::dashboardStats — failed', { error });
+        throw new GraphQLError('Failed to fetch dashboard statistics', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
+      }
     }),
   },
 

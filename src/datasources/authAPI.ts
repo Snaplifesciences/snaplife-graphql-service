@@ -1,6 +1,14 @@
 import axios from 'axios';
+import https from 'https';
 import { handleAxiosError } from '../error/apiErrorUtils';
 import { logger } from '../utils/logger';
+
+// Configure axios to ignore SSL certificate errors in development
+if (process.env.NODE_ENV === 'dev') {
+  axios.defaults.httpsAgent = new https.Agent({
+    rejectUnauthorized: false
+  });
+}
 
 // API Response Types
 export interface UserRole {

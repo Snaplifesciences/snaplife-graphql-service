@@ -91,5 +91,25 @@ export const userAPI = {
             logger.error('UserAPI::validateToken failed', { error: err.message, response: err.response?.data });
             return { success: false, message };
         }
+    },
+
+    async getUserCounts(companyId?: string, organizationId?: string): Promise<{ invitedUsers: number; activeUsers: number }> {
+        logger.info('UserAPI::getUserCounts initiated', { companyId, organizationId });
+        
+        const params = new URLSearchParams();
+        if (companyId) params.append('companyId', companyId);
+        if (organizationId) params.append('organizationId', organizationId);
+        
+        const path = `/counts${params.toString() ? '?' + params.toString() : ''}`;
+        
+        try {
+            const response = await customActionClient.get(path);
+            logger.info('UserAPI::getUserCounts completed successfully', response.data);
+            return response.data;
+        } catch (error) {
+            const err = error as AxiosError<BackendError>;
+            logger.error('UserAPI::getUserCounts failed', { error: err.message, response: err.response?.data });
+            throw error;
+        }
     }
 };
